@@ -1,8 +1,8 @@
-module.exports = function(app, db) {
+module.exports = function(router, db) {
 
 	var jwt = require('jsonwebtoken');
 
-	app.post('/auth', function (req, res) {
+	router.post('/', function (req, res) {
 	
 		let username = req.body.username;
 		let passHash = req.body.pass; //TODO: Hash the password here.
@@ -20,10 +20,12 @@ module.exports = function(app, db) {
 				return res.send({ error: false, message: 'Welcome. Here is your token.', token: token });
 			}
 
-			return res.send({ error: true, message: 'Invalid Credentials.' });
+			return res.status(401).send({ error: true, message: 'Invalid Credentials.' });
 		});
 
 	});
+
+	return router;
 
 }
 

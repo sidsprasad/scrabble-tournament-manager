@@ -1,20 +1,16 @@
-module.exports = function(app, mysql) {
+module.exports = function(app) {
 
 	var jwt = require('jsonwebtoken');
-	const db = mysql.createConnection({
-	    host: 'localhost',
-	    user: 'root',
-	    password: 'root',
-	    database: 'ScrabbleTournaments'
-	});
-	db.connect();
 
 	app.use('/', function(req, res, next) {
-		// console.log(req.originalUrl);
-		if (req.originalUrl === "/" || req.originalUrl === "/auth") {
-			next();
-		}
-		else {
+
+		urlPath = req.originalUrl;
+		splitUrlPath = urlPath.split("/");
+
+		//console.log(req.originalUrl);
+		//console.log(splitUrlPath);
+
+		if(splitUrlPath[1]==="api" && splitUrlPath[2]!=="auth") {
 
 			let token = req.headers['x-access-token'];
 			// console.log(token)
@@ -30,7 +26,11 @@ module.exports = function(app, mysql) {
 			}
 
 			next();
+
+		} else {
+			next();
 		}
+
 	});
 
 }

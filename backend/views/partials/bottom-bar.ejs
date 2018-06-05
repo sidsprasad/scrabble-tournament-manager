@@ -1,0 +1,27 @@
+<nav class="navbar fixed-bottom navbar-expand navbar-dark bg-dark">
+	<ul class="navbar-nav mx-auto center">
+		<% if (activeButton=="tournaments") { %>
+		 	<li class="nav-item active" style="width: 33vw; text-align: center;">
+		<% } else { %>
+			<li class="nav-item" style="width: 33vw; text-align: center;">
+		<% } %>
+				<a class="nav-link" href="<%= domainName+'/tournaments' %>"><i class="fas fa-calendar-alt"></i></a>
+			</li>
+
+		<% if (activeButton=="games") { %>	
+			<li class="nav-item active" style="width: 33vw; text-align: center;">
+		<% } else { %>
+			<li class="nav-item" style="width: 33vw; text-align: center;">
+		<% } %>
+				<a class="nav-link" href="#"><i class="fas fa-cubes"></i></a>
+			</li>
+
+		<% if (activeButton=="profile") { %>
+			<li class="nav-item active" style="width: 33vw; text-align: center;">
+		<% } else { %>
+			<li class="nav-item" style="width: 33vw; text-align: center;">
+		<% } %>
+				<a class="nav-link" href="<%= domainName+'/profile' %>"><i class="fas fa-user"></i></a>
+			</li>
+	</ul>
+</nav>

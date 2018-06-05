@@ -8,14 +8,22 @@ app.use(bodyParser.urlencoded({
 	extended: true
 }));
 
-require('./middleware')(app, mysql);
+require('./middleware')(app);
 
-// default route
-app.get('/', function (req, res) {
-	return res.send({ error: true, message: 'hello' })
-});
+// ROUTES
+var router = require('express').Router();
 
-require('./routes')(app, mysql);
+app.set('view engine', 'ejs');
+var frontEnd = require('./frontRoutes')(router);
+
+var APIs = require('./apiRoutes')(router, mysql);
+
+
+app.use("/", frontEnd)
+app.use("/api", APIs);
+
+//End of Routes
+
 
 // port must be set to 8080 because incoming http requests are routed from port 80 to port 8080
 app.listen(8080, function () {
