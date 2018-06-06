@@ -52,7 +52,7 @@ module.exports = function(router, db) {
 
 		// CHECK IF NAME UNIQUE
 		// Done by db. But cath the error!
-
+		
 		db.query("INSERT INTO leagues SET ?", { name: name, admin: admin, gamesPerPair: gamesPerPair, startDate: startDate, endDate: endDate }, function (error, results, fields) {
 			if (error) throw error;
 			return res.send({ error: false, data: results, message: 'New league has been created successfully.' });
