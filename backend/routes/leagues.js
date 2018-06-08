@@ -9,13 +9,20 @@ module.exports = function(router, db) {
 		if (!start) start = 0;
 		if (!limit) limit = 10000;
 
-		// TODO: CHANGE THIS :P
-		let started = 0;
-		if (status === 'ongoing') {
-			started = 1;
+		var qry="";
+		switch (status) {
+			case 'archived':
+				qry = 'SELECT * FROM leagues WHERE endDate < CURRENT_DATE LIMIT ? OFFSET ?';
+				break;
+			case 'ongoing':
+				qry = 'SELECT * FROM leagues WHERE endDate >= CURRENT_DATE AND startDate < CURRENT_DATE LIMIT ? OFFSET ?';
+				break;
+			case 'upcoming':
+			default:
+				qry = 'SELECT * FROM leagues WHERE startDate >= CURRENT_DATE LIMIT ? OFFSET ?';
 		}
-		//
-		db.query('SELECT * FROM leagues WHERE started=? LIMIT ? OFFSET ?', [started, limit, start], function (error, results, fields) {
+
+		db.query(qry, [limit, start], function (error, results, fields) {
 			if (error) throw error;
 			return res.send({ error: false, data: results, message: 'List of leagues.' });
 		});
@@ -26,25 +33,32 @@ module.exports = function(router, db) {
 
 		let name = req.body.name;
 		let gamesPerPair = req.body.gamesPerPair;
-		let startDate = req.body.startDate;
-		let endDate = req.body.endDate;
+		let startDate = new Date(req.body.startDate);
+		let endDate = new Date(req.body.endDate);
 
 		let admin = res.locals.username;
 		let adminLevel = res.locals.adminLevel;
 
 		if (adminLevel == 0) {
-			return res.status(400).send({ error:true, message: 'You are not authorized to create a league.' });
+			return res.send({ error:true, message: 'You are not authorized to create a league.' });
 		}
 
 		if (!name) {
-			return res.status(400).send({ error:true, message: 'Please provide league name.' });
+			return res.send({ error:true, message: 'Please provide league name.' });
 		}
 
 		// MAKE SURE DATE IS IN CORRECT FORMAT BRUH! :P
 		// ALSO CHECK IF START DATE IS ON OR AFTER TODAY. AND END DATE IS ON OR AFTER START DATE.
 		if (!startDate || !endDate) {
-			return res.status(400).send({ error:true, message: 'Please provide valid start and end date.' });
+			return res.send({ error:true, message: 'Please provide valid start and end date.' });
 		}
+		if (compareDates(startDate,endDate)==1) {
+			return res.send({ error:true, message: 'End date has to be on or after Start date.' });
+		}
+		if(compareDates(startDate,new Date())==-1) {
+			return res.send({ error:true, message: 'Start date cannot be in the past.' });
+		}
+
 
 		if (!gamesPerPair) {
 			gamesPerPair = 1;
@@ -58,6 +72,24 @@ module.exports = function(router, db) {
 			return res.send({ error: false, data: results, message: 'New league has been created successfully.' });
 		});
 	});
+
+	// returns -1, 0, 1 for <, ==, >
+	function compareDates(d1, d2) {
+		if(d1.getYear()<d2.getYear()) return -1;
+		if(d1.getYear()>d2.getYear()) return 1;
+		else {
+			if(d1.getMonth()<d2.getMonth()) return -1;
+			if(d1.getMonth()>d2.getMonth()) return 1;
+			else {
+				if(d1.getDate()<d2.getDate()) return -1;
+				if(d1.getDate()>d2.getDate()) return 1;
+				else return 0;
+			}
+
+		}
+		
+
+	}
 
 	return router;
 }

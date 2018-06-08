@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+</head>
+<style type="text/css">
+    /*******************************
+    * ACCORDION WITH TOGGLE ICONS
+    * Does not work properly if "in" is added after "collapse".
+    *******************************/
+        .panel-group .panel {
+            border-radius: 0;
+            box-shadow: none;
+            border-color: #EEEEEE;
+        }
+
+        .panel-default > .panel-heading {
+            padding: 0;
+            border-radius: 0;
+            color: #212121;
+            background-color: #F7F7F7;
+            border-color: #EEEEEE;
+        }
+
+        .panel-title {
+            height: 8vh;
+            margin-top: 1vh;
+            margin-bottom: 1vh;
+            border-color: #BBBBBB;
+            border-width: 0;
+            border-bottom-width: 1px;
+            border-style: solid;
+
+        }
+
+        .panel-title > a {
+            color: black;
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            font-size: 80%;
+        }
+
+        .list-group > a {
+            color: black;
+            display: block;
+            text-decoration: none;
+        }
+
+        .more-less {
+            float: right;
+            color: #212121;
+        }
+
+        .panel-default > .panel-heading + .panel-collapse > .panel-body {
+            border-top-color: #EEEEEE;
+        }
+
+        .panel-body {
+            padding: 25px;
+        }
+
+        #update-score-screen {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: white;
+            z-index: 5;
+            top: 0;
+
+            padding: 20px;
+
+            overflow-y: auto;
+        }
+</style>
+<body>
+    <header class="bg-dark">
+        <% include ../partials/header %>
+    </header>
+
+    <main>
+
+        <div class="panel-group" id="accordion" style="margin: 0;padding: 0;">
+
+            <!-- <div class="panel panel-default">
+              <div class="bg-dark panel-heading">
+                <h4 class="panel-title" >
+                  <a data-toggle="collapse" data-parent="#accordion" href="#collapse0" style="color:white;text-transform:capitalize;"><%=status%></a>
+                </h4>
+              </div>
+              <div id="collapse0" class="panel-collapse collapse in">
+                <ul class="list-group">
+                    <a href="<%= domainName %>/games?status=pending"><li class="list-group-item">Pending</li></a>
+                    <a href="<%= domainName %>/games?status=settling"><li class="list-group-item">Settling</li></a>
+                    <a href="<%= domainName %>/games?status=finished"><li class="list-group-item">Finished</li></a>
+                </ul>
+              </div>
+            </div> -->
+
+        </div> 
+
+        <div id="update-score-screen">
+            <u><h3 id="update-score-screen-gameName" style="text-transform: capitalize;">NAME</h3></u>
+            <div style="padding: 20px;">
+                <h4 style="text-align: center;"><u>Update Score</u></h4>
+                <div id="already-entered">
+                    <p>
+                        <h5><u><span id="youOrOpponents">Opponent's</span> Input: </u></h5>
+                        <p style="width: 100%; text-align: center;"><span id="already-entered-playerOneScore">x</span> vs. <span id="already-entered-playerTwoScore">x</span></p>
+                    </p>
+                    <button id="accept-already-entered-button">Accept</button>
+                    <br><br>
+                    <h5><u>Change Score</u></h5>
+                </div>
+                <input type="number" class="form-control" placeholder="Player One Score" required="required" id="update-playerOne-score">
+                <br>
+                <input type="number" class="form-control" placeholder="Player Two Score" required="required" id="update-playerTwo-score">
+                <br>
+                <button id="update-score-button">Update</button>
+                <br><br>
+                <button id="close-update-score-screen">Close</button>
+            </div>
+        </div>
+
+
+
+    </main>
+
+<footer>
+    <% activeButton = "games" %>
+    <% include ../partials/bottom-bar %>
+</footer>
+
+<% include ../scripts/global-scripts %>
+
+<script type="text/javascript">
+    /*******************************
+    * ACCORDION WITH TOGGLE ICONS
+    *******************************/
+        function toggleIcon(e) {
+            $(e.target)
+                .prev('.panel-heading')
+                .find(".more-less")
+                .toggleClass('glyphicon-plus glyphicon-minus');
+        }
+        $('.panel-group').on('hidden.bs.collapse', toggleIcon);
+        $('.panel-group').on('shown.bs.collapse', toggleIcon);
+
+
+        function updateGameScore(data) {
+            
+            $("#already-entered").hide();
+            $("#update-score-screen-gameName").html(data.name+': '+data.playerOne+' vs. '+data.playerTwo);
+
+            var action;
+            switch(data.scoreStatusCode) {
+                case 'p1entered':
+                case 'p1countered':
+                    
+                    action = "counter";
+
+                    if (data.playerOne === currUser) {
+                        $("#youOrOpponents").html("Your");
+                        $("#accept-already-entered-button").hide();
+                    } else {
+                        $("#youOrOpponents").html("Opponent's");
+                        $("#accept-already-entered-button").show();
+                    }
+                    $("#already-entered-playerOneScore").html(data.playerOneScore);
+                    $("#already-entered-playerTwoScore").html(data.playerTwoScore);
+                    $("#already-entered").show();
+                    break;
+                case 'p2entered':
+                case 'p2countered':
+                    
+                    action = "counter";
+
+                    if (data.playerTwo === currUser) {
+                        $("#youOrOpponents").html("Your");
+                        $("#accept-already-entered-button").hide();
+                    } else {
+                        $("#youOrOpponents").html("Opponent's");
+                        $("#accept-already-entered-button").show();
+                    }
+                    $("#already-entered-playerOneScore").html(data.playerOneScore);
+                    $("#already-entered-playerTwoScore").html(data.playerTwoScore);
+                    $("#already-entered").show();
+                    break;
+                case 'none':
+                default:
+                    action = "enter";
+                    break;
+            }
+
+            $("#accept-already-entered-button").unbind('click');
+            $("#accept-already-entered-button").click(function(){
+                postRequest('<%=domainName%>/api/games/'+data.id+'/updateScore/accept',{},function (data) {
+                    alert("Accepted!");
+                    window.location.replace("<%= domainName %>/games");
+                });
+            });
+
+            $("#update-score-button").unbind('click');
+            $("#update-score-button").click(function () {
+                var newPlayerOneScore = $("#update-playerOne-score").val();
+                var newPlayerTwoScore = $("#update-playerTwo-score").val();
+                
+                //console.log(newPlayerOneScore+' '+newPlayerTwoScore);
+                
+                if(newPlayerOneScore && newPlayerTwoScore) {
+
+                    var params = { 
+                        playerOneScore: parseInt(newPlayerOneScore), playerTwoScore: parseInt(newPlayerTwoScore)
+                    };
+                    postRequest('<%=domainName%>/api/games/'+data.id+'/updateScore/'+action,params,function (data) {
+                        alert(action+"ed!");
+                        window.location.replace("<%= domainName %>/games");
+                    });
+
+                }
+            });
+
+
+            $("#update-score-screen").show();
+        }
+
+
+        $("#close-update-score-screen").click(function () {
+            $("#update-score-screen").hide();
+        });
+
+        function createRecord(data, i) {
+
+            var scoreStatus;
+            switch(data.scoreStatusCode) {
+                case 'p1entered':
+                    scoreStatus="Player 1 Entered";
+                    break;
+                case 'p2entered':
+                    scoreStatus="Player 2 Entered";
+                    break;
+                case 'p1countered':
+                    scoreStatus="Player 1 Countered";
+                    break;
+                case 'p2countered':
+                    scoreStatus="Player 2 Countered";
+                    break;
+                case 'accepted':
+                    scoreStatus=data.gameResultCode;
+                    break;
+                case 'none':
+                default:
+                    scoreStatus="Pending";
+            }
+            var record = $.parseHTML('<div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'+i+'">'+data.name+': <i>'+data.playerOne+' vs. '+data.playerTwo+'</i></a></h4></div><div id="collapse'+i+'" class="panel-collapse collapse in"><div class="panel-body"><b>Score: </b>'+data.playerOneScore+' - '+data.playerTwoScore+'<br><b>Score status: </b>'+scoreStatus+'<br><button id="game_'+data.id+'">Update Score</button></div></div></div>');
+
+            $("#accordion").append(record);
+            $("#game_"+data.id).click(function () {
+                console.log(data);
+                updateGameScore(data);
+            });
+            if (data.scoreStatusCode == 'accepted') {
+                $("#game_"+data.id).hide();
+            }
+            //console.log(record)
+        }
+
+        function populateList(data) {
+            data = data.data;
+            //console.log("MOO",data)
+            for (i=0; i<data.length; i++) {
+                createRecord(data[i],i+1);
+            }
+        }
+        
+
+        $(function() {
+            currUser = getCookie('username');
+            adminLevel = getCookie('adminLevel');
+
+            getRequest('<%=domainName%>/api/games/getGames?playerId='+currUser,populateList);
+
+            $("#update-score-screen").hide();
+        });
+</script>
+
+
+</body>
+</html>

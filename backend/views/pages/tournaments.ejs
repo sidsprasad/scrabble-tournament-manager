@@ -25,6 +25,7 @@
         .panel-title {
             height: 8vh;
             margin-top: 1vh;
+            margin-bottom: 1vh;
             border-color: #BBBBBB;
             border-width: 0;
             border-bottom-width: 1px;
@@ -36,6 +37,13 @@
             color: black;
             display: block;
             padding: 15px;
+            text-decoration: none;
+            font-size: 80%;
+        }
+
+        .list-group > a {
+            color: black;
+            display: block;
             text-decoration: none;
         }
 
@@ -49,79 +57,138 @@
         }
 
         .panel-body {
-            padding: 15px;
+            padding: 25px;
+        }
+
+
+        #tournament-details {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: white;
+            z-index: 5;
+            top: 0;
+
+            padding: 20px;
+
+            overflow-y: auto;
+        }
+
+
+        #view-games {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: white;
+            z-index: 6;
+            top: 0;
+
+            padding: 20px;
+
+            overflow-y: auto;
+        }
+
+
+
+        #add-participant-screen {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: white;
+            z-index: 6;
+            top: 0;
+
+            padding: 20px;
+
+            overflow-y: auto;
         }
 </style>
 <body>
-    <header>
+    <header class="bg-dark">
         <% include ../partials/header %>
     </header>
 
     <main>
 
-
-
-            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="false">
-
-                <div class="panel panel-default">
-                    <div class="panel-heading" role="tab" id="headingOne">
-                        <h4 class="panel-title">
-                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                <i class="more-less glyphicon glyphicon-plus"></i>
-                                Collapsible Group Item #1
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                        <div class="panel-body">
-                          <b>Start Date: </b> 5/06/2018 <br>
-                          <b>Admin: </b> sid <br>
-                          <button>Details</button>
-                      </div>
-                  </div>
-              </div>
-
-              <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingTwo">
-                    <h4 class="panel-title">
-                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                            <i class="more-less glyphicon glyphicon-plus"></i>
-                            Collapsible Group Item #2
-                        </a>
-                    </h4>
-                </div>
-                <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-                    <div class="panel-body">
-                        <b>Start Date: </b> 5/06/2018 <br>
-                        <b>Admin: </b> sid <br>
-                        <button>Details</button>
-                    </div>
-                </div>
-            </div>
+        <div class="panel-group" id="accordion" style="margin: 0;padding: 0;">
 
             <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingThree">
-                    <h4 class="panel-title">
-                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                            <i class="more-less glyphicon glyphicon-plus"></i>
-                            Collapsible Group Item #3
-                        </a>
-                    </h4>
-                </div>
-                <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
-                    <div class="panel-body">
-                        <b>Start Date: </b> 5/06/2018 <br>
-                        <b>Admin: </b> sid <br>
-                        <button>Details</button>
-                    </div>
-                </div>
+              <div class="bg-dark panel-heading">
+                <h4 class="panel-title" >
+                  <a data-toggle="collapse" data-parent="#accordion" href="#collapse0" style="color:white;text-transform:capitalize;"><%=status%></a>
+                </h4>
+              </div>
+              <div id="collapse0" class="panel-collapse collapse in">
+                <ul class="list-group">
+                    <a href="<%= domainName %>/tournaments?status=upcoming"><li class="list-group-item">Upcoming</li></a>
+                    <a href="<%= domainName %>/tournaments?status=ongoing"><li class="list-group-item">Ongoing</li></a>
+                    <a href="<%= domainName %>/tournaments?status=archived"><li class="list-group-item">Archived</li></a>
+                </ul>
+              </div>
             </div>
 
-        </div><!-- panel-group -->
+        </div> 
+
+
+        <div id="tournament-details">
+            <u><h3 id="tournament-name">NAME</h3></u>
+            <div style="padding: 20px;">
+                <h4>Start Date: </h4> <span id="tournament-start-date">1-1-2018</span>
+                <br><br>
+                <h4>End Date: </h4> <span id="tournament-end-date">1-1-2018</span>
+                <br><br>
+                <h5>You are <span  id="tournament-join-status-not">not </span>registered.</h5>
+                <br>
+                <button id="view-tournament-games">View games</button> <button id="close-tournament-details">Close</button>
+                <br><br>
+                <h4><u>Participants</u> <button id="add-participant">+</button></h4>
+
+                <table id="tournament-participants-list" style="width:100%; text-align: center;">
+                  <!-- <tr>
+                    <td>USER</td>
+                  </tr> -->
+                </table>
+            </div>
+        </div>
+
+        <div id="add-participant-screen">
+            <u><h3 id="tournament-addParticipant-name">NAME</h3></u>
+            <div style="padding: 20px;">
+                <h4 style="text-align: center;"><u>Add Participant</u></h4>
+                <input type="text" class="form-control" placeholder="Username" required="required" id="add-participant-username">
+                <br>
+                <button id="add-participant-button">Add</button>
+                <br><br>
+                <button id="close-add-participant-screen">Close</button>
+            </div>
+        </div>
+
+
+        <div id="view-games">
+            <u><h3 id="tournament-viewGame-name">NAME</h3></u>
+            <div style="padding: 20px;">
+             <button id="close-view-games">Close</button>
+                <h4 style="text-align: center;"><u>Games</u></h4>
+
+                <table id="tournament-games-list" style="width:100%; text-align: center; text-transform: capitalize;">
+                  <!-- <tr>
+                    <td>sid vs dad</td>
+                    <td>450 - 200</td>
+                    <td>played </td>
+                  </tr>
+                  <tr>
+                    <td>sid vs dad</td>
+                    <td></td>
+                    <td>not played</td>
+                  </tr> -->
+                </table>
+            </div>
+        </div>
 
 
 
-</main>
+
+    </main>
 
 <footer>
     <% activeButton = "tournaments" %>
@@ -142,6 +209,150 @@
         }
         $('.panel-group').on('hidden.bs.collapse', toggleIcon);
         $('.panel-group').on('shown.bs.collapse', toggleIcon);
+
+
+        function getGames(data) {
+            //console.log(data);
+            data = data.data;
+            for (i=0; i<data.length; i++) {
+                if (data[i].scoreStatusCode === 'none') {
+                    gameStatus = "Pending"
+                    score = "";
+                }
+                else if (data[i].scoreStatusCode === 'accepted') {
+                    gameStatus = "Played"
+                    score = data[i].playerOneScore + " - " + data[i].playerTwoScore;
+                }
+                else {
+                    gameStatus = "Settling Scores"
+                    score = "";
+                }
+                
+                $("#tournament-games-list").append("<tr><td>"+data[i].playerOne+" Vs. "+data[i].playerTwo+"</td><td>"+score+"</td><td>"+gameStatus+"</td></tr>")
+            }
+        }
+
+        function getViewGames(data) {
+            //console.log(data);
+            $("#tournament-viewGame-name").html(data.name);
+            $("#tournament-games-list").empty();
+
+            getRequest('<%=domainName%>/api/games/getGames?leagueId='+data.id,getGames);           
+
+            $("#view-games").show();
+        }
+
+
+        function getParticipants(data) {
+            data = data.data;
+            //console.log("PARTICIPANTS",data);
+            for (i=0; i<data.length; i++) {
+                if (data[i].username == currUser) {
+                    $("#tournament-join-status-not").hide();
+                }
+                $("#tournament-participants-list").append("<tr><td>"+data[i].rank+"</td><td>"+data[i].username+"</td></tr>")
+            }
+        }
+
+        function addParticipant(data) {
+            $("#tournament-addParticipant-name").html(data.name);
+
+            $("#add-participant-button").unbind('click');
+            $("#add-participant-button").click(function() {
+                var newuser = $("#add-participant-username").val();
+                if (newuser) {
+                    var params = {username: newuser};
+
+                    postRequest('<%=domainName%>/api/league/'+data.id+'/addPlayer',params,function (data) {
+                        $("#tournament-details").hide();
+                        alert("Added!");
+                        $("#add-participant-username").val("");
+                    });
+                } else {
+                    alert("Please enter username!");
+                }
+            });
+
+            $("#add-participant-screen").show();
+        }
+
+        function getTournamentDetails(data) {
+            console.log(data);
+
+            $("#tournament-name").html(data.name);
+            $("#tournament-start-date").html(formatDate(new Date(data.startDate)));
+            $("#tournament-end-date").html(formatDate(new Date(data.endDate)));
+            $("#tournament-participants-list").empty();
+            $("#tournament-join-status-not").show();
+            $("#add-participant").hide();
+
+            $("#view-tournament-games").unbind('click');
+            $("#view-tournament-games").click(function() {
+                getViewGames(data);
+            });
+
+            $("#add-participant").unbind('click');
+            $("#add-participant").click(function() {
+                addParticipant(data);
+            });
+
+            getRequest('<%=domainName%>/api/league/'+data.id+'/getParticipants',getParticipants);
+
+            if (adminLevel == 2 || data.admin === currUser) {
+                $("#add-participant").show();
+            }            
+
+            $("#tournament-details").show();
+        }
+
+        $("#close-tournament-details").click(function () {
+            $("#tournament-details").hide();
+        });
+
+        $("#close-view-games").click(function () {
+            $("#view-games").hide();
+        });
+
+        $("#close-add-participant-screen").click(function () {
+            $("#add-participant-screen").hide();
+        });
+
+        function createRecord(data, i) {
+
+            var startingDate = formatDate(new Date(data.startDate));
+
+            var record = $.parseHTML('<div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'+i+'">'+data.name+'</a></h4></div><div id="collapse'+i+'" class="panel-collapse collapse in"><div class="panel-body"><b>Start Date: </b>'+startingDate+'<br><b>No. of participants: </b>'+data.noOfPlayers+'<br><b>Rounds: </b>'+data.gamesPerPair+'<br><button id="league_'+data.id+'">Details</button></div></div></div>');
+
+            $("#accordion").append(record);
+            $("#league_"+data.id).click(function () {
+                console.log(data.id);
+                getTournamentDetails(data);
+            });
+            //console.log(record)
+        }
+
+        function populateList(data) {
+            data = data.data;
+            //console.log("MOO",data)
+            for (i=0; i<data.length; i++) {
+                createRecord(data[i],i+1);
+            }
+        }
+
+        /*function fetchError (err) {
+            alert(err.message);
+        }*/
+
+        $(function() {
+            $("#tournament-details").hide();
+                $("#add-participant").hide();
+                $("#add-participant-screen").hide();
+            $("#view-games").hide();
+            getRequest('<%=domainName%>/api/leagues/getLeagues?status=<%=status%>',populateList);
+
+            currUser = getCookie('username');
+            adminLevel = getCookie('adminLevel');
+        });
 </script>
 
 

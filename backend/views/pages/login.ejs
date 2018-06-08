@@ -5,24 +5,25 @@
 </head>
 <body>
 <header>
-    <% include ../partials/header %>
+    <% include ../partials/header-empty %>
 </header>
 
 <main>
 	<style type="text/css">
-		.login-form {
+		#login-form {
 			width: 340px;
 	    	margin: 50px auto;
 		}
-	    .login-form form {
+	    #login-form form {
 	    	margin-bottom: 15px;
 	        background: #f7f7f7;
 	        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
 	        padding: 30px;
 	    }
-	    .login-form h2 {
+	    #login-form h2 {
 	        margin: 0 0 15px;
 	    }
+
 	    .form-control, .btn {
 	        min-height: 38px;
 	        border-radius: 2px;
@@ -31,28 +32,64 @@
 	        font-size: 15px;
 	        font-weight: bold;
 	    }
+
+	    #request-account-form {
+			width: 340px;
+	    	margin: 50px auto;
+		}
+	    #request-account-form form {
+	    	margin-bottom: 15px;
+	        background: #f7f7f7;
+	        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+	        padding: 30px;
+	    }
+	    #request-account-form h2 {
+	        margin: 0 0 15px;
+	    }
+
 	</style>
-    <div class="login-form">
-    <form>
-        <h2 class="text-center">Log in</h2>       
-        <div class="form-group">
-            <input type="text" class="form-control" placeholder="Username" required="required" id="username">
-        </div>
-        <div class="form-group">
-            <input type="password" class="form-control" placeholder="Password" required="required" id="password">
-        </div>
-        <div class="form-group">
-            <button type="button" class="btn btn-primary btn-block" id="login-button">Log in</button>
-        </div>
-        <div class="clearfix">
-            <label class="pull-left checkbox-inline"><input type="checkbox"> Remember me</label>
-        </div>  
-        <br>
-        <div class="text-center"><a href="#" class="pull-right">Forgot Password?</a></div>      
-    </form>
-    
-    <p class="text-center"><button type="button" class="btn btn-secondary btn-block">Request for an Account</button></p>
-</div>
+    <div id="login-form">
+	    <form>
+	        <h2 class="text-center">Log in</h2>       
+	        <div class="form-group">
+	            <input type="text" class="form-control" placeholder="Username" required="required" id="username">
+	        </div>
+	        <div class="form-group">
+	            <input type="password" class="form-control" placeholder="Password" required="required" id="password">
+	        </div>
+	        <div class="form-group">
+	            <button type="button" class="btn btn-primary btn-block" id="login-button">Log in</button>
+	        </div>
+	        <div class="clearfix">
+	            <label class="pull-left checkbox-inline"><input type="checkbox"> Remember me</label>
+	        </div>  
+	        <br>
+	        <div class="text-center"><a href="#" class="pull-right">Forgot Password?</a></div>      
+	    </form>
+	    
+	    <p class="text-center"><button type="button" class="btn btn-secondary btn-block" id="open-request-account-form">Request for an Account</button></p>
+	</div>
+
+	<div id="request-account-form">
+		<form>
+	        <h2 class="text-center">Account Request</h2>       
+	        <div class="form-group">
+	            <input type="email" class="form-control" placeholder="E-mail ID" required="required" id="requested-email">
+	        </div>
+	        <div class="form-group">
+	            <input type="text" class="form-control" placeholder="Username" required="required" id="requested-username">
+	        </div>
+	        <div class="form-group">
+	            <textarea class="form-control" style="width: 100%;" id="requested-message" placeholder="Message to Admin (Optional)
+[Max: 128 Chars]"></textarea>
+	        </div>
+	        <div class="form-group">
+	            <button type="button" class="btn btn-primary btn-block" id="request-button">Request</button>
+	        </div>   
+	    </form>
+	    
+	    <p class="text-center"><button type="button" class="btn btn-secondary btn-block" id="open-login-form">Already have an account?</button></p>
+	</div>
 </main>
 
 <footer>
@@ -69,25 +106,84 @@
 				username: username,
 				pass: password
 			};
-			$.post("<%= domainName %>/api/auth", params, function(data, status) {
-				//alert("Data: " + data + "\nStatus: " + status);
-				if (status=='success') {
-					token = data.token;
-					var d = new Date();
-    				d.setTime(d.getTime() + (24*60*60*1000));
-					var expires = "expires="+ d.toUTCString()
+			if (!username || !password) {
+				alert("Enter username and password.");
+			} else {
+				$.post("<%= domainName %>/api/auth", params, function(data, status) {
+					//alert("Data: " + data + "\nStatus: " + status);
+					if (status=='success' && !data.error) {
+						token = data.token;
+						adminLevel = data.adminLevel;
+						var d = new Date();
+	    				d.setTime(d.getTime() + (24*60*60*1000));
+						var expires = "expires="+ d.toUTCString()
 
-					document.cookie = "username=" + username + ";" + expires + ";path=/";
-					document.cookie = "token=" + token + ";" + expires + ";path=/";
-					
-					window.location.href = "<%= domainName %>/tournaments";
-					//alert(document.cookie);
+						document.cookie = "username=" + username + ";" + expires + ";path=/";
+						document.cookie = "token=" + token + ";" + expires + ";path=/";
+						document.cookie = "adminLevel=" + adminLevel + ";" + expires + ";path=/";
+						
+						window.location.href = "<%= domainName %>/tournaments?status=upcoming";
 
-				}
-			}).fail(function(response) {
-			    alert('Error: ' + response.responseText);
-			});
+					} else if(data && data.error) {
+						alert(data.message);
+					} else {
+						alert("Login Error");
+					}
+				}).fail(function(response) {
+				    alert('Error: ' + response.responseText);
+				});
+			}
 		});
+
+		$("#request-button").click(function(){
+			username = $("#requested-username").val();
+			email = $("#requested-email").val();
+			message = $("#requested-message").val();
+			params = {
+				email: email,
+				username: username,
+				message: message
+			};
+			if (!username || !email) {
+				alert("Enter username and password.");
+			} else {
+				$.post("<%= domainName %>/api/auth/requestAccount", params, function(data, status) {
+					//alert("Data: " + data + "\nStatus: " + status);
+					if (status=='success' && !data.error) {
+
+						alert("Successfully Requested. Admin will be in touch.")						
+						$("#request-account-form").hide();			
+						$("#login-form").show();
+
+						$("#requested-username").val("");
+						$("#requested-email").val("");
+						$("#requested-message").val("");
+
+					} else if(data && data.error) {
+						alert(data.message);
+					} else {
+						alert("Request Account Error");
+					}
+				}).fail(function(response) {
+				    alert('Error: ' + response.responseText);
+				});
+			}
+		});
+
+		$("#open-login-form").click(function () {
+			$("#request-account-form").hide();			
+			$("#login-form").show();
+		});
+
+		$("#open-request-account-form").click(function () {
+			$("#login-form").hide();
+			$("#request-account-form").show();			
+		});
+
+		$(function() {
+			$("#request-account-form").hide();
+			$("#login-form").show();
+        });
 	</script>
 </body>
 </html>

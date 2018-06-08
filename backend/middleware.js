@@ -23,8 +23,9 @@ module.exports = function(app) {
 				
 				res.locals.username = decoded.username;
 				res.locals.adminLevel = decoded.adminLevel;
+
 			} catch (err) {
-				return res.send({ error: true, message: 'Invalid Token.', error: err});
+				return res.send({ error: true, message: err, logout: true});
 			}
 
 			next();

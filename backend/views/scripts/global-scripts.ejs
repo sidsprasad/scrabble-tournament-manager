@@ -17,4 +17,85 @@
 	    }
 	    return "";
 	}
+
+	function formatDate(date) {
+		var monthNames = [
+		"January", "February", "March",
+		"April", "May", "June", "July",
+		"August", "September", "October",
+		"November", "December"
+		];
+
+		var day = date.getDate();
+		var monthIndex = date.getMonth();
+		var year = date.getFullYear();
+
+		return day + ' ' + monthNames[monthIndex] + ' ' + year;
+	}
+
+	function requestFail(data) {
+		if (data && data.logout) 
+	    	window.location.replace("<%= domainName %>/login");
+	    else {
+	    	if(data)
+	    		alert(data.message);
+	    	else 
+	    		alert("Sever Error Occured.")
+	    }
+	}
+
+	function getRequest (url,successCallback) {
+		//console.log(getCookie('token'));
+		$.ajax({
+			url: url,
+			type: "GET",
+			headers: {
+				'x-access-token': getCookie('token')
+			},
+			success: function(data) {
+				console.log(data);
+				if (data.error) requestFail(data);
+				else successCallback(data);
+			},
+			error: function(xhr){
+				console.log("An error occured: " + xhr.status + " " + xhr.statusText);
+				requestFail(undefined);
+			}
+		});
+	}
+
+
+
+	function postRequest (url,params,successCallback) {
+		//console.log(getCookie('token'));
+		$.ajax({
+			url: url,
+			type: "POST",
+			headers: {
+				'x-access-token': getCookie('token')
+			},
+			data: params,
+			success: function(data) {
+				console.log(data);
+				if (data.error) requestFail(data);
+				else successCallback(data);
+			},
+			error: function(xhr){
+				console.log("An error occured: " + xhr.status + " " + xhr.statusText);
+				requestFail(undefined);
+			}
+		});
+	}
+
+	$("#logout").click(function () {
+
+		document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+		window.location.href = "<%= domainName %>/login";
+
+	});
+
+
+
+
+		
 </script>

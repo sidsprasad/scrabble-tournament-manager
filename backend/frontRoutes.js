@@ -14,7 +14,11 @@ module.exports = function(router) {
 	});
 
 	router.get('/tournaments', function (req, res) {
-		return res.render('pages/tournaments')
+		return res.render('pages/tournaments', {status: req.query.status})
+	});
+
+	router.get('/games', function (req, res) {
+		return res.render('pages/games', {status: req.query.status})
 	});
 
 	return router;

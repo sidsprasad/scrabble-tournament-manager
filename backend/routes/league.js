@@ -15,7 +15,7 @@ module.exports = function(router, db) {
 
 		// CHECK IF LEAGUE EXISTS!
 
-		db.query('SELECT username, rank FROM leagueParticipation WHERE leagueId=?', leagueId, function (error, results, fields) {
+		db.query('SELECT * FROM leagueParticipation WHERE leagueId=?', leagueId, function (error, results, fields) {
 			if (error) throw error;
 			return res.send({ error: false, data: results, message: 'List of Participants.' });
 		});
@@ -61,7 +61,7 @@ module.exports = function(router, db) {
 		// The above two are handeled by db design;)
 
 
-			db.query('SELECT username, rank FROM leagueParticipation WHERE leagueId=?', leagueId, function (error, results, fields) {
+			db.query('SELECT * FROM leagueParticipation WHERE leagueId=?', leagueId, function (error, results, fields) {
 				if (error) throw error;
 				playerList = []
 				results.forEach(function (row) {
