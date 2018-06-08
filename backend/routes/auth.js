@@ -58,6 +58,10 @@ module.exports = function(router, db) {
 
 	});
 
+	/*router.post('/generateOTP', function (req,res) {
+		// let username = req.
+	});*/
+
 	return router;
 
 }

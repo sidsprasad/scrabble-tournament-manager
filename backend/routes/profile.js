@@ -5,14 +5,14 @@ module.exports = function(router, db) {
 		let playerId = req.params.playerId;
 
 		if (!playerId) {
-			return res.status(400).send({ error:true, message: 'Please enter player ID.' });
+			return res.send({ error:true, message: 'Please enter player ID.' });
 		}
 
 		db.query('SELECT username, adminLevel, wins, draws, losses FROM players WHERE username=?', playerId, function (error, results, fields) {
 			if (error) throw error;
 
 			if (!results[0]) {
-				return res.status(400).send({ error:true, message: 'Please enter valid player ID.' });
+				return res.send({ error:true, message: 'Please enter valid player ID.' });
 			}
 
 			return res.send({ error: false, data: results[0], message: 'Player details.' });
@@ -24,7 +24,7 @@ module.exports = function(router, db) {
 		let playerId = req.params.playerId;
 
 		if (!playerId) {
-			return res.status(400).send({ error: true, message: 'Please enter player ID.' });
+			return res.send({ error: true, message: 'Please enter player ID.' });
 		}
 
 		db.query('SELECT id, name, startDate, wins, draws, losses FROM leagueParticipation INNER JOIN leagues ON leagueParticipation.leagueId=leagues.id WHERE username=? ORDER BY leagues.startDate DESC;', 
@@ -32,6 +32,21 @@ module.exports = function(router, db) {
 			if (error) throw error;
 
 			return res.send({ error: false, data: results, message: 'List of contests specified player is participating in.' });
+		});
+	});
+
+	router.get('/getAccountRequests', function (req, res) {
+
+		let username = res.locals.username;
+		let adminLevel = res.locals.adminLevel;
+
+		if (adminLevel < 1) {
+			return res.send({ error: true, message: 'You are not authorized.' });
+		}
+
+		db.query('SELECT * FROM accountCreationRequests', {}, function (error, results, fields) {
+			if (error) throw error;
+			return res.send({ error: false, data: results, message: 'List of Account Creation Requests.' });
 		});
 	});
 

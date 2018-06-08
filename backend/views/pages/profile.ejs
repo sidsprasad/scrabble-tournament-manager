@@ -9,6 +9,58 @@
 </header>
 
 <style type="text/css">
+.panel-group .panel {
+            border-radius: 0;
+            box-shadow: none;
+            border-color: #EEEEEE;
+        }
+
+        .panel-default > .panel-heading {
+            padding: 0;
+            border-radius: 0;
+            color: #212121;
+            background-color: #F7F7F7;
+            border-color: #EEEEEE;
+        }
+
+        .panel-title {
+            height: 8vh;
+            margin-top: 0vh;
+            margin-bottom: 0vh;
+            border-color: #BBBBBB;
+            border-width: 0;
+            border-bottom-width: 1px;
+            border-style: solid;
+
+        }
+
+        .panel-title > a {
+            color: black;
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            font-size: 80%;
+        }
+
+        .list-group > a {
+            color: black;
+            display: block;
+            text-decoration: none;
+        }
+
+        .more-less {
+            float: right;
+            color: #212121;
+        }
+
+        .panel-default > .panel-heading + .panel-collapse > .panel-body {
+            border-top-color: #EEEEEE;
+        }
+
+        .panel-body {
+            padding: 25px;
+        }
+
     .form-control, .btn {
         min-height: 38px;
         border-radius: 2px;
@@ -45,71 +97,108 @@
     #create-tournament-form h2 {
         margin: 0 0 15px;
     }
+
+    #admin-tools  button {
+        width: 100%;
+    } 
+
+    #account-creation-requests {
+        position: fixed;
+        top: 8vh;
+        height: 84vh;
+        width: 100%;
+        background-color: white;
+        z-index: 6;
+
+        padding: 0px;
+
+        overflow-y: auto;
+    }
+
 </style>
 
-<main style="padding: 15px;">
-    <div class="jumbotron">
-        <h1 id="username" style="text-transform:capitalize;"></h1>
-        <p>Welcome!</p>
-    </div>
-    <div class="jumbotron" id="admin-tools-section">
-        <h3><u>Admin Tools</u></h3>
-        <div id="admin-tools">
-            <br>
-            <button id="create-tournament-button">Create Tournament</button>
-            <div id="handle-admin-button-section">
-                <br><br>
-                <button id="make-admin-button">Make Admin</button>
-                <button id="remove-admin-button">Remove Admin</button>
+<main>
+    <div id="main-screen" style="padding: 15px;">
+        <div class="jumbotron">
+            <h1 id="username" style="text-transform:capitalize;"></h1>
+            <p>Welcome!</p>
+        </div>
+        <div class="jumbotron" id="admin-section">
+            <h3><u>Admin Tools</u></h3>
+            <div id="admin-tools">
+                <br>
+                <div id="level-1-admin-section">
+                    <button id="create-tournament-button">Create Tournament</button>
+                    <br><br>
+                    <button id="account-requests-button">Account Requests</button>
+                </div>
+                <div id="level-2-admin-section">
+                    <br>
+                    <button id="make-admin-button">Make Admin</button>
+                    <br><br>
+                    <button id="remove-admin-button">Remove Admin</button>
+                </div>
             </div>
-            &nbsp;
-        </div>
 
-        <div id="create-tournament-form">
-            <form>
-                <h2 class="text-center">Create Tournament</h2>       
-                <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Tournament Name [Max: 32 chars]" required="required" id="new-tournament-name">
-                </div>
-                <div class="form-group">
-                    <input type="number" class="form-control" placeholder="Number of rounds" required="required" id="new-tournament-rounds">
-                </div>
-                <div class="form-group">
-                    Start Date: <input type="date" class="form-control" required="required" id="new-tournament-start-date">
-                </div>
-                <div class="form-group">
-                    End Date: <input type="date" class="form-control" required="required" id="new-tournament-end-date">
-                </div>
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-block" id="create-tournament-submit-button">Submit</button>
-                </div>   
-            </form>
-            
-            <p class="text-center"><button type="button" class="btn btn-secondary btn-block open-admin-tools">Back</button></p>
-        </div>
+            <div id="create-tournament-form">
+                <form>
+                    <h2 class="text-center">Create Tournament</h2>       
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Tournament Name [Max: 32 chars]" required="required" id="new-tournament-name">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" class="form-control" placeholder="Number of rounds" required="required" id="new-tournament-rounds">
+                    </div>
+                    <div class="form-group">
+                        Start Date: <input type="date" class="form-control" required="required" id="new-tournament-start-date">
+                    </div>
+                    <div class="form-group">
+                        End Date: <input type="date" class="form-control" required="required" id="new-tournament-end-date">
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary btn-block" id="create-tournament-submit-button">Submit</button>
+                    </div>   
+                </form>
+                
+                <p class="text-center"><button type="button" class="btn btn-secondary btn-block open-admin-tools">Back</button></p>
+            </div>
 
-        <div id="make-admin-form">
-            <form>
-                <h2 class="text-center">Make Admin</h2>       
-                <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Player ID (username)" required="required" id="new-admin-username">
-                </div>
-                <div class="form-group">
-                    <select id="new-admin-level" style="width: 100%; text-align: center;">
-                        <option value="">Select Level</option>
-                        <option value="1">Level 1</option>
-                        <option value="2">Level 2</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary btn-block" id="make-admin-submit-button">Submit</button>
-                </div>   
-            </form>
-            
-            <p class="text-center"><button type="button" class="btn btn-secondary btn-block open-admin-tools">Back</button></p>
-        </div>
+            <div id="make-admin-form">
+                <form>
+                    <h2 class="text-center">Make Admin</h2>       
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Player ID (username)" required="required" id="new-admin-username">
+                    </div>
+                    <div class="form-group">
+                        <select id="new-admin-level" style="width: 100%; text-align: center;">
+                            <option value="">Select Level</option>
+                            <option value="1">Level 1</option>
+                            <option value="2">Level 2</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary btn-block" id="make-admin-submit-button">Submit</button>
+                    </div>   
+                </form>
+                
+                <p class="text-center"><button type="button" class="btn btn-secondary btn-block open-admin-tools">Back</button></p>
+            </div>
 
+        </div>
     </div>
+    <div id="account-creation-requests">
+        <div style="padding: 15px;">
+            <h3><u>Account Creation Requests</u></h3>
+            <button class="open-admin-tools">Close</button><br>
+        </div>
+        <hr>
+        <div class="panel-group" id="accordion" style="margin: 0;padding: 0;">
+
+           
+
+        </div> 
+    </div>
+
 </main>
 
 <footer>
@@ -165,10 +254,23 @@
 
 
         $(".open-admin-tools").click(function () {
+            $("#account-creation-requests").hide();
             $("#make-admin-form").hide();
             $("#create-tournament-form").hide();
 
             $("#admin-tools").show();
+        });
+
+        $("#account-requests-button").click(function () {
+
+
+            getRequest('<%=domainName%>/api/profile/getAccountRequests',populateList);
+            
+
+
+
+            $("#admin-tools").hide();
+            $("#account-creation-requests").show();
         });
 
         $("#make-admin-button").click(function () {
@@ -181,6 +283,32 @@
             $("#create-tournament-form").show();
         });
 
+        function generateOTP(data) {
+            console.log(data);
+        }
+
+        function createRecord(data, i) {
+
+
+            var record = $.parseHTML('<div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'+i+'">'+data.email+'</a></h4></div><div id="collapse'+i+'" class="panel-collapse collapse in"><div class="panel-body"><b>Requested Username: </b>'+data.username+'<br><p><b>Message: </b>'+data.message+'</p><button id="genOTP_'+data.username+'">Generate OTP</button></div></div></div>');
+
+            $("#accordion").append(record);
+            $("#genOTP_"+data.username).click(function () {
+                generateOTP(data);
+            });
+        }
+
+        function populateList(data) {
+            $("#accordion").empty();
+            data = data.data;
+            //console.log("MOO",data)
+            for (i=0; i<data.length; i++) {
+                createRecord(data[i],i+1);
+            }
+        }
+
+
+
         $(function() {
             var adminLevel = getCookie('adminLevel');
             var username = getCookie('username')
@@ -191,11 +319,13 @@
             $('#username').html( username );
 
             if(adminLevel<2) {
-                $("#handle-admin-button-section").hide();
+                $("#level-2-admin-section").hide();
             }
             if(adminLevel<1) {
-                $("#create-tournament-button").hide();
+                $("#level-1-admin-section").hide();
+                $("#admin-section").hide();
             }
+            $("#account-creation-requests").hide();
             $("#make-admin-form").hide();
             $("#create-tournament-form").hide();
 
