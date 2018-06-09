@@ -88,5 +88,54 @@ module.exports = function(router, db) {
 
 	});
 
+	router.post('/deleteCreationRequest', function (req,res) {
+		let email = req.body.email;
+
+		let currUser = res.locals.username;
+		let currAdminLevel = res.locals.adminLevel;
+
+		if (currAdminLevel < 1) {
+			return res.send({ error: true, message: 'You are not authorized.' });
+		}
+
+		db.query('DELETE FROM accountCreationRequests WHERE email=? ', email, function (error, results, fields) {
+			if (error) throw error;
+			return res.send({ error: false, data: results, message: 'Request Deleted.' });
+		});
+	});
+
+	function generateOTP(length) {
+		
+		var t = ((new Date()).getTime()).toString();
+		var text = "";
+		var textLen = length-(t.length+1);
+		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+		for (var i = 0; i < textLen; i++)
+			text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+		text += "-"+t;
+		return text;
+	}
+
+	router.post('/generateOTP', function (req,res) {
+		let email = req.body.email;
+
+		let currUser = res.locals.username;
+		let currAdminLevel = res.locals.adminLevel;
+
+		if (currAdminLevel < 1) {
+			return res.send({ error: true, message: 'You are not authorized.' });
+		}
+
+		var OTP = generateOTP(32);
+
+		db.query('UPDATE accountCreationRequests SET OTP=? WHERE email=? ', [OTP, email], function (error, results, fields) {
+			if (error) throw error;
+			return res.send({ error: false, OTP: OTP, message: 'OTP Generated.' });
+		});
+	});
+	
+
 	return router;
 }

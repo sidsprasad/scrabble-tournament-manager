@@ -283,18 +283,36 @@
             $("#create-tournament-form").show();
         });
 
-        function generateOTP(data) {
-            console.log(data);
+        function generateOTP(record) {
+            params = {email: record.email};
+            postRequest('<%=domainName%>/api/profile/generateOTP',params,function (data) {
+                alert("OTP generated.");
+                $("#OTP_"+record.username).html(data.OTP);
+            });
         }
+
+        function deleteRequest(record) {
+
+            params = {email: record.email};
+            postRequest('<%=domainName%>/api/profile/deleteCreationRequest',params,function (data) {
+                alert("Request Deleted.");
+                $("#user_"+record.username).remove();
+            });
+        }
+
+
 
         function createRecord(data, i) {
 
 
-            var record = $.parseHTML('<div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'+i+'">'+data.email+'</a></h4></div><div id="collapse'+i+'" class="panel-collapse collapse in"><div class="panel-body"><b>Requested Username: </b>'+data.username+'<br><p><b>Message: </b>'+data.message+'</p><button id="genOTP_'+data.username+'">Generate OTP</button></div></div></div>');
+            var record = $.parseHTML('<div id="user_'+data.username+'" class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'+i+'">'+data.email+'</a></h4></div><div id="collapse'+i+'" class="panel-collapse collapse in"><div class="panel-body"><b>Requested Username: </b>'+data.username+'<br><p><b>Message: </b>'+data.message+'</p><b>OTP: </b> <span id="OTP_'+data.username+'">'+data.OTP+'</span><br><button id="genOTP_'+data.username+'">Generate new OTP</button>&nbsp;<button id="delete_'+data.username+'">Delete Request</button></div></div></div>');
 
             $("#accordion").append(record);
             $("#genOTP_"+data.username).click(function () {
                 generateOTP(data);
+            });
+            $("#delete_"+data.username).click(function () {
+                deleteRequest(data);
             });
         }
 
