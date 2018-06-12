@@ -5,7 +5,7 @@ module.exports = function(router, db) {
 	// GET APIS ----------------------------------------------------------------------------------------------------------------------
 	// TODO: Make all these get function bodies use helper funtions (Might not work tho. Think.) :P
 	// Get Participants
-	router.get('/:leagueId/getParticipants', function (req, res) {
+	router.get('/:leagueId/getLeaderboard', function (req, res) {
 
 		let leagueId = req.params.leagueId;
 
@@ -15,9 +15,9 @@ module.exports = function(router, db) {
 
 		// CHECK IF LEAGUE EXISTS!
 
-		db.query('SELECT * FROM leagueParticipation WHERE leagueId=?', leagueId, function (error, results, fields) {
+		db.query('SELECT * FROM leagueLeaderboards WHERE leagueId=?', leagueId, function (error, results, fields) {
 			if (error) throw error;
-			return res.send({ error: false, data: results, message: 'List of Participants.' });
+			return res.send({ error: false, data: results, message: 'League Leaderboard.' });
 		});
 	});
 
@@ -92,7 +92,7 @@ module.exports = function(router, db) {
 						for (i = 0; i < playerList.length; i++) {
 							if (playerList[i] == newuser) continue;
 							for (gameNo = 1; gameNo <= gamesPerPair; gameNo++) {
-								insertGamesQuery += "(" + leagueId + ", '" + playerList[i] + "', '" + newuser + "', 'Game "+gameNo+"')";
+								insertGamesQuery += "(" + leagueId + ", '" + playerList[i] + "', '" + newuser + "', 'Game "+gameNo+"/"+gamesPerPair+"')";
 
 								if (!(i==playerList.length-1 && gameNo==gamesPerPair)) {
 									insertGamesQuery += ", ";

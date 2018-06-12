@@ -286,8 +286,8 @@
         function generateOTP(record) {
             params = {email: record.email};
             postRequest('<%=domainName%>/api/profile/generateOTP',params,function (data) {
-                alert("OTP generated.");
                 $("#OTP_"+record.username).html(data.OTP);
+                alert("OTP generated.");
             });
         }
 

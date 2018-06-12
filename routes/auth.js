@@ -24,11 +24,11 @@ module.exports = function(router, db) {
 
 						return res.send({ error: false, message: 'Welcome. Here is your token.', token: token , adminLevel: results[0].adminLevel});
 					} else {
-						return res.status(401).send({ error: true, message: 'Invalid Password.' });
+						return res.send({ error: true, message: 'Invalid Password.' });
 					} 
 				});
 			} else {
-				return res.status(401).send({ error: true, message: 'Invalid Username.' });
+				return res.send({ error: true, message: 'Invalid Username.' });
 			}
 
 		});

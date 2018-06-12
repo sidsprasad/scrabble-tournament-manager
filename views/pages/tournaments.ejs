@@ -102,6 +102,18 @@
 
             overflow-y: auto;
         }
+
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 5px;
+        }
+        th {
+            text-align: left;
+        }
+
 </style>
 <body>
     <header class="bg-dark">
@@ -132,21 +144,29 @@
 
         <div id="tournament-details">
             <u><h3 id="tournament-name">NAME</h3></u>
-            <div style="padding: 20px;">
+            <div style="padding: 20px; overflow-x: auto;">
                 <h4>Start Date: </h4> <span id="tournament-start-date">1-1-2018</span>
                 <br><br>
                 <h4>End Date: </h4> <span id="tournament-end-date">1-1-2018</span>
                 <br><br>
-                <h5>You are <span  id="tournament-join-status-not">not </span>registered.</h5>
+                <h5><b>You are <span  id="tournament-join-status-not">not </span>registered.</b></h5>
                 <br>
                 <button id="view-tournament-games">View games</button> <button id="close-tournament-details">Close</button>
                 <br><br>
-                <h4><u>Participants</u> <button id="add-participant">+</button></h4>
+                <h4><u>Participants</u> <button id="add-participant">+</button></h4><button onclick="exportTableToCSV('leaderboard.csv')">Download Leaderboard</button>
+                <br><br>
 
-                <table id="tournament-participants-list" style="width:100%; text-align: center;">
-                  <!-- <tr>
-                    <td>USER</td>
-                  </tr> -->
+                <table id="tournament-leaderboard" style="width:100%; text-align: center;">
+                  <!-- <th>
+                    <td>Rank</td>
+                    <td>Player</td>
+                    <td>P</td>
+                    <td>W</td>
+                    <td>D</td>
+                    <td>L</td>
+                    <td>Points</td>
+                    <td>Spread</td>
+                  </th> -->
                 </table>
             </div>
         </div>
@@ -243,14 +263,14 @@
         }
 
 
-        function getParticipants(data) {
+        function getLeaderboard(data) {
             data = data.data;
             //console.log("PARTICIPANTS",data);
             for (i=0; i<data.length; i++) {
                 if (data[i].username == currUser) {
                     $("#tournament-join-status-not").hide();
                 }
-                $("#tournament-participants-list").append("<tr><td>"+data[i].rank+"</td><td>"+data[i].username+"</td></tr>")
+                $("#tournament-leaderboard").append("<tr><td>"+(i+1)+"</td><td>"+data[i].username+"</td><td>"+data[i].played+"</td><td>"+data[i].wins+"</td><td>"+data[i].draws+"</td><td>"+data[i].losses+"</td><td>"+Math.round(data[i].points*10)/10+"</td><td>"+data[i].spread+"</td></tr>")
             }
         }
 
@@ -282,7 +302,9 @@
             $("#tournament-name").html(data.name);
             $("#tournament-start-date").html(formatDate(new Date(data.startDate)));
             $("#tournament-end-date").html(formatDate(new Date(data.endDate)));
-            $("#tournament-participants-list").empty();
+            $("#tournament-leaderboard").empty();
+            $("#tournament-leaderboard").append("<tr><th>Rank</th><th>Player</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Points</th><th>Spread</th></tr>");
+
             $("#tournament-join-status-not").show();
             $("#add-participant").hide();
 
@@ -296,7 +318,7 @@
                 addParticipant(data);
             });
 
-            getRequest('<%=domainName%>/api/league/'+data.id+'/getParticipants',getParticipants);
+            getRequest('<%=domainName%>/api/league/'+data.id+'/getLeaderboard',getLeaderboard);
 
             if (adminLevel == 2 || data.admin === currUser) {
                 $("#add-participant").show();
@@ -353,6 +375,58 @@
             currUser = getCookie('username');
             adminLevel = getCookie('adminLevel');
         });
+
+
+
+
+
+
+
+        /// DOWNLOAD CSV
+        function downloadCSV(csv, filename) {
+            var csvFile;
+            var downloadLink;
+
+            // CSV file
+            csvFile = new Blob([csv], {type: "text/csv"});
+
+            // Download link
+            downloadLink = document.createElement("a");
+
+            // File name
+            downloadLink.download = filename;
+
+            // Create a link to the file
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+
+            // Hide download link
+            downloadLink.style.display = "none";
+
+            // Add the link to DOM
+            document.body.appendChild(downloadLink);
+
+            // Click download link
+            downloadLink.click();
+
+            downloadLink.parentNode.removeChild(downloadLink);
+        }
+
+        function exportTableToCSV(filename) {
+            var csv = [];
+            var rows = document.querySelectorAll("table tr");
+            
+            for (var i = 0; i < rows.length; i++) {
+                var row = [], cols = rows[i].querySelectorAll("td, th");
+                
+                for (var j = 0; j < cols.length; j++) 
+                    row.push(cols[j].innerText);
+                
+                csv.push(row.join(","));        
+            }
+
+            // Download CSV file
+            downloadCSV(csv.join("\n"), filename);
+        }
 </script>
 
 
