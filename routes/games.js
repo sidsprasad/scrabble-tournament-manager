@@ -72,11 +72,12 @@ module.exports = function(router, db) {
 			}
 
 
-			var currP1 = results[0].playerOnw;
+			var currLeagueId = results[0].leagueId;
+
+			var currP1 = results[0].playerOne;
 			var currP2 = results[0].playerTwo;
 			var currP1Score = results[0].playerOneScore;
 			var currP2Score = results[0].playerTwoScore;
-			var currLeagueId = results[0].leagueId;
 
 			var currentScoreStatusCode = results[0].scoreStatusCode;
 
@@ -114,21 +115,114 @@ module.exports = function(router, db) {
 
 			} else if (currentScoreStatusCode !== 'none' && currentScoreStatusCode.charAt(1) !== currUser.charAt(1) && action === 'accept') {
 
-				var gameResultCode;
-				if (currP1Score>currP2Score) {
-					gameResultCode = "P1W";
-				} else if (currP1Score<currP2Score) {
-					gameResultCode = "P2W";
-				} else {
-					gameResultCode = "DRAW";
-				}
-				db.query("UPDATE leagueGames SET ? WHERE id = ?", [{ scoreStatusCode: "accepted", gameResultCode: gameResultCode }, gameId], function (error, results, fields) {
-					if (error) throw error;
+				db.beginTransaction(function (error) {
+					if(error) {
+						db.rollback(function() {
+							throw error;
+						});
+					}
+					var winner;
+					var winnerScore;
+					var loser;
+					var loserScore;
+					var gameResultCode;
 
-					// db.query("UPDATE leagueParticipation SET ? WHERE id = ?", [{ scoreStatusCode: "accepted", gameResultCode: gameResultCode }, gameId], function (error, results, fields) {
-						// if (error) throw error;
-						return res.send({ error: false, data: results, message: 'Score has been accepted.' });
-					// }
+					if (currP1Score>currP2Score) {
+						gameResultCode = "P1W";
+						winner = currP1;
+						winnerScore = currP1Score;
+						loser = currP2;
+						loserScore = currP2Score;
+					} else if (currP1Score<currP2Score) {
+						gameResultCode = "P2W";
+						winner = currP2;
+						winnerScore = currP2Score;
+						loser = currP1;
+						loserScore = currP1Score;
+					} else {
+						gameResultCode = "DRAW";
+
+						// JUST CALLING P2 WINNER and P1 LOSER.
+						winner = currP2;
+						winnerScore = currP2Score;
+						loser = currP1;
+						loserScore = currP1Score;
+					}
+
+					if (gameResultCode === "DRAW") {
+						// DRAW LOGIC
+						db.query("UPDATE leagueGames SET ? WHERE id = ?", [{ scoreStatusCode: "accepted", gameResultCode: gameResultCode }, gameId], function (error, results, fields) {
+							if(error) {
+								db.rollback(function() {
+									throw error;
+								});
+							}
+							// P1 aka. WINNER Score
+							db.query("UPDATE leagueParticipation SET draws = draws + 1, totalScore = totalScore + ?, totalScoreAgainst = totalScoreAgainst + ? WHERE leagueId = ? AND username = ?",
+										[winnerScore, loserScore, currLeagueId, winner],  function (error, results, fields) {
+								if(error) {
+									db.rollback(function() {
+										throw error;
+									});
+								}
+
+								// UPDATE LOSER RECORD
+								db.query("UPDATE leagueParticipation SET draws = draws + 1, totalScore = totalScore + ?, totalScoreAgainst = totalScoreAgainst + ? WHERE leagueId = ? AND username = ?",
+										[loserScore, winnerScore, currLeagueId, loser],  function (error, results, fields) {
+									if(error) {
+										db.rollback(function() {
+											throw error;
+										});
+									}
+									db.commit(function (error) {
+										if(error) {
+											db.rollback(function() {
+												throw error;
+											});
+										}
+										return res.send({ error: false, data: results, message: 'Score has been accepted.' });
+									});
+								});
+
+							});
+						});
+					} else {
+						db.query("UPDATE leagueGames SET ? WHERE id = ?", [{ scoreStatusCode: "accepted", gameResultCode: gameResultCode }, gameId], function (error, results, fields) {
+							if(error) {
+								db.rollback(function() {
+									throw error;
+								});
+							}
+							// UPDATE WINNER RECORD
+							db.query("UPDATE leagueParticipation SET wins = wins + 1, totalScore = totalScore + ?, totalScoreAgainst = totalScoreAgainst + ? WHERE leagueId = ? AND username = ?",
+										[winnerScore, loserScore, currLeagueId, winner],  function (error, results, fields) {
+								if(error) {
+									db.rollback(function() {
+										throw error;
+									});
+								}
+
+								// UPDATE LOSER RECORD
+								db.query("UPDATE leagueParticipation SET losses = losses + 1, totalScore = totalScore + ?, totalScoreAgainst = totalScoreAgainst + ? WHERE leagueId = ? AND username = ?",
+										[loserScore, winnerScore, currLeagueId, loser],  function (error, results, fields) {
+									if(error) {
+										db.rollback(function() {
+											throw error;
+										});
+									}
+									db.commit(function (error) {
+										if(error) {
+											db.rollback(function() {
+												throw error;
+											});
+										}
+										return res.send({ error: false, data: results, message: 'Score has been accepted.' });
+									});
+								});
+
+							});
+						});
+					}
 				});
 
 			} else {

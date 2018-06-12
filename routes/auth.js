@@ -56,7 +56,10 @@ module.exports = function(router, db) {
 			}
 
 			db.query("INSERT INTO accountCreationRequests SET ?", { email: email, username: username, message: message }, function (error, results, fields) {
-				if (error) throw error;
+				if (error) {
+					return res.send({ error: true, message: 'The given username and/or email ID already requested.'});
+					throw error;
+				}
 				return res.send({ error: false, message: 'Account requested.'});
 			});
 		});
@@ -83,15 +86,37 @@ module.exports = function(router, db) {
 			
 			if(results[0]) {
 				//return res.send({ error: false, message: 'Valid Details. Make request to /setPassword.'});
-				bcrypt.hash(password, 10, function(err, hash) {
+				bcrypt.hash(password, 10, function(error, hash) {
+					if (error) throw error;
 					// Store hash in database
-					db.query("INSERT INTO players SET ?", { email: email, username: username, passHash: hash }, function (error, results, fields) {
-						if (error) throw error;
+					db.beginTransaction(function (error){
+						if(error) {
+							db.rollback(function() {
+								throw error;
+							});
+						}
+						db.query("INSERT INTO players SET ?", { email: email, username: username, passHash: hash }, function (error, results, fields) {
+							if(error) {
+								db.rollback(function() {
+									throw error;
+								});
+							}
 
-						db.query("DELETE FROM accountCreationRequests WHERE username=? AND email=?", [username, email], function (error, results, fields) {
-							if (error) throw error;
-
-							return res.send({ error: false, message: 'Account Created.'});
+							db.query("DELETE FROM accountCreationRequests WHERE username=? AND email=?", [username, email], function (error, results, fields) {
+								if(error) {
+									db.rollback(function() {
+										throw error;
+									});
+								}
+								db.commit(function (error) {
+									if(error) {
+										db.rollback(function() {
+											throw error;
+										});
+									}	
+									return res.send({ error: false, message: 'Account Created.'});
+								});
+							});
 						});
 					});
 				});
