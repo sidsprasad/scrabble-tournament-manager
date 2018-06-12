@@ -413,10 +413,10 @@
 
         function exportTableToCSV(filename) {
             var csv = [];
-            var rows = document.querySelectorAll("table tr");
+            var rows = document.querySelectorAll("#tournament-leaderboard tr");
             
             for (var i = 0; i < rows.length; i++) {
-                var row = [], cols = rows[i].querySelectorAll("td, th");
+                var row = [], cols = rows[i].querySelectorAll("#tournament-leaderboard td, #tournament-leaderboard th");
                 
                 for (var j = 0; j < cols.length; j++) 
                     row.push(cols[j].innerText);

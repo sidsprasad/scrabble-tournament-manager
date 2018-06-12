@@ -3,7 +3,7 @@ module.exports = function(router) {
 	let domainName = require('./config/domainName')()
 
 	router.get('/', function (req, res) {
-		return res.send({ error: true, message: 'hello' })
+		return res.render('pages/index', {domainName: domainName})
 	});
 
 	router.get('/login', function (req, res) {

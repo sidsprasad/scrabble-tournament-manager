@@ -25,13 +25,13 @@ module.exports = function(router, db) {
 			});
 		} else if (playerId) {
 			// SELECT * FROM leagueGames WHERE playerOne=? OR playerTwo=?
-			db.query('SELECT leagueGames.id, leagueId, name, playerOne, playerTwo, playerOneScore, playerTwoScore, scoreStatusCode, gameResultCode FROM leagueGames INNER JOIN leagues ON leagueGames.leagueId=leagues.id WHERE playerOne=? OR playerTwo=?',
+			db.query('SELECT leagueGames.id, leagueId, name, playerOne, playerTwo, label, playerOneScore, playerTwoScore, scoreStatusCode, gameResultCode FROM leagueGames INNER JOIN leagues ON leagueGames.leagueId=leagues.id WHERE playerOne=? OR playerTwo=?',
 				[playerId, playerId], function (error, results, fields) {
 				if (error) throw error;
 				return res.send({ error: false, data: results, message: 'Games where given playerId is a participant.' });
 			});
 		} else {
-			db.query('SELECT leagueId, name, playerOne, playerTwo, playerOneScore, playerTwoScore, scoreStatusCode, gameResultCode FROM leagueGames INNER JOIN leagues ON leagueGames.leagueId=leagues.id WHERE (playerOne=? AND playerTwo=?) OR (playerTwo=? AND playerOne=?)',
+			db.query('SELECT leagueId, name, playerOne, playerTwo, label, playerOneScore, playerTwoScore, scoreStatusCode, gameResultCode FROM leagueGames INNER JOIN leagues ON leagueGames.leagueId=leagues.id WHERE (playerOne=? AND playerTwo=?) OR (playerTwo=? AND playerOne=?)',
 					[playerOneId, playerTwoId, playerOneId, playerTwoId], function (error, results, fields) {
 				if (error) throw error;
 				return res.send({ error: false, data: results, message: 'Games between given playerIds.' });

@@ -1,10 +1,10 @@
-module.exports = function(mainRouter, mysql) {
+module.exports = function(mainRouter, mysql, mysqlCreds) {
 
 	const db = mysql.createConnection({
-	    host: 'localhost',
-	    user: 'root',
-	    password: 'root',
-	    database: 'ScrabbleTournaments'
+	    host: mysqlCreds.host,
+	    user: mysqlCreds.user,
+	    password: mysqlCreds.password,
+	    database: mysqlCreds.database
 	});
 	db.connect();
 

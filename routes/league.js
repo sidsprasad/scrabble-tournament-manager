@@ -92,7 +92,7 @@ module.exports = function(router, db) {
 						for (i = 0; i < playerList.length; i++) {
 							if (playerList[i] == newuser) continue;
 							for (gameNo = 1; gameNo <= gamesPerPair; gameNo++) {
-								insertGamesQuery += "(" + leagueId + ", '" + playerList[i] + "', '" + newuser + "', 'Game "+gameNo+"/"+gamesPerPair+"')";
+								insertGamesQuery += "(" + leagueId + ", '" + playerList[i] + "', '" + newuser + "', 'Game "+gameNo+" of "+gamesPerPair+"')";
 
 								if (!(i==playerList.length-1 && gameNo==gamesPerPair)) {
 									insertGamesQuery += ", ";

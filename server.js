@@ -10,13 +10,15 @@ app.use(bodyParser.urlencoded({
 
 require('./middleware')(app);
 
-// ROUTES
+app.use('/resources',express.static('public'));
+
 var router = require('express').Router();
 
 app.set('view engine', 'ejs');
 var frontEnd = require('./frontRoutes')(router);
 
-var APIs = require('./apiRoutes')(router, mysql);
+const mysqlCreds = require('./config/mysqlCreds.js')();
+var APIs = require('./apiRoutes')(router, mysql, mysqlCreds);
 
 
 app.use("/", frontEnd)
@@ -27,5 +29,5 @@ app.use("/api", APIs);
 
 // port must be set to 8080 because incoming http requests are routed from port 80 to port 8080
 app.listen(8080, function () {
-	console.log('Node app is running on port 8080');
+	console.log('ScrabMan is running on port 8080');
 });
