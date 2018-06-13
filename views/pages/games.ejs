@@ -238,7 +238,13 @@
                 default:
                     scoreStatus="Pending";
             }
-            var record = $.parseHTML('<div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'+i+'">'+data.name+': <i>'+data.playerOne+' vs. '+data.playerTwo+'</i></a></h4></div><div id="collapse'+i+'" class="panel-collapse collapse in"><div class="panel-body"><b>Score: </b>'+data.playerOneScore+' - '+data.playerTwoScore+'<br><b>Score status: </b>'+scoreStatus+'<br><button id="game_'+data.id+'">Update Score</button></div></div></div>');
+            var against;
+            if (data.playerOne == currUser) {
+                against = data.playerTwo;
+            } else {
+                against = data.playerOne;
+            }
+            var record = $.parseHTML('<div class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'+i+'">'+data.name+'. <i><b style="text-transform: capitalize;">'+against+'</b> <span style="font-size: 75%;">('+data.label+')</span> </i> </a></h4></div><div id="collapse'+i+'" class="panel-collapse collapse in"><div class="panel-body"><b>Score: </b>'+data.playerOneScore+' - '+data.playerTwoScore+'<br><b>Score status: </b>'+scoreStatus+'<br><button id="game_'+data.id+'">Update Score</button></div></div></div>');
 
             $("#accordion").append(record);
             $("#game_"+data.id).click(function () {
