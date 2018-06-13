@@ -107,15 +107,21 @@ module.exports = function(router, db) {
 									throw error;
 								});
 							}
-
-							db.commit(function(error) {
-								if (error) { 
-									connection.rollback(function() {
+							db.query("UPDATE leagues SET noOfPlayers = noOfPlayers + 1 WHERE id = ?", leagueId, function (error, results, fields) {
+								if (error) {
+									db.rollback(function() {
 										throw error;
 									});
 								}
-								console.log("Inserted Games.")
-								return res.send({ error: false, message: "Player and his games added successfully." });
+								db.commit(function(error) {
+									if (error) { 
+										connection.rollback(function() {
+											throw error;
+										});
+									}
+									console.log("Inserted Games.")
+									return res.send({ error: false, message: "Player and his games added successfully." });
+								});
 							});
 
 						});

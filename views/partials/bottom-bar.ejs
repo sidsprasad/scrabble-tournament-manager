@@ -5,7 +5,7 @@
 		<% } else { %>
 			<li class="nav-item" style="width: 33vw; text-align: center;">
 		<% } %>
-				<a class="nav-link" href="<%= domainName+'/tournaments?status=upcoming' %>"><i class="fas fa-calendar-alt"></i></a>
+				<a class="nav-link" onclick="showLoading()" href="<%= domainName+'/tournaments?status=upcoming' %>"><i class="fas fa-calendar-alt"></i></a>
 			</li>
 
 		<% if (activeButton=="games") { %>	
@@ -13,7 +13,7 @@
 		<% } else { %>
 			<li class="nav-item" style="width: 33vw; text-align: center;">
 		<% } %>
-				<a class="nav-link" href="<%= domainName+'/games' %>"><i class="fas fa-cubes"></i></a>
+				<a class="nav-link" onclick="showLoading()" href="<%= domainName+'/games' %>"><i class="fas fa-cubes"></i></a>
 			</li>
 
 		<% if (activeButton=="profile") { %>
@@ -21,7 +21,7 @@
 		<% } else { %>
 			<li class="nav-item" style="width: 33vw; text-align: center;">
 		<% } %>
-				<a class="nav-link" href="<%= domainName+'/profile' %>"><i class="fas fa-user"></i></a>
+				<a class="nav-link" onclick="showLoading()" href="<%= domainName+'/profile' %>"><i class="fas fa-user"></i></a>
 			</li>
 	</ul>
 </nav>

@@ -46,6 +46,7 @@
 
 	function getRequest (url,successCallback) {
 		//console.log(getCookie('token'));
+		showLoading();
 		$.ajax({
 			url: url,
 			type: "GET",
@@ -53,11 +54,13 @@
 				'x-access-token': getCookie('token')
 			},
 			success: function(data) {
+				hideLoading();
 				console.log(data);
 				if (data.error) requestFail(data);
 				else successCallback(data);
 			},
 			error: function(xhr){
+				hideLoading();
 				console.log("An error occured: " + xhr.status + " " + xhr.statusText);
 				requestFail(undefined);
 			}
@@ -68,6 +71,7 @@
 
 	function postRequest (url,params,successCallback) {
 		//console.log(getCookie('token'));
+		showLoading();
 		$.ajax({
 			url: url,
 			type: "POST",
@@ -77,10 +81,12 @@
 			data: params,
 			success: function(data) {
 				console.log(data);
+				hideLoading();
 				if (data.error) requestFail(data);
 				else successCallback(data);
 			},
 			error: function(xhr){
+				hideLoading();
 				console.log("An error occured: " + xhr.status + " " + xhr.statusText);
 				requestFail(undefined);
 			}
@@ -95,7 +101,41 @@
 	});
 
 
+	function showLoading() {
+		$("#loading-screen").show();
+	}
+
+	function hideLoading() {
+		$("#loading-screen").hide();
+	}
+
+	$( function () {
+		$("#loading-screen").hide();
+	});
 
 
+	function sleep(milliseconds) {
+		var start = new Date().getTime();
+		for (var i = 0; i < 1e7; i++) {
+			if ((new Date().getTime() - start) > milliseconds){
+				break;
+			}
+		}
+	}
 		
 </script>
+<style type="text/css">
+	#loading-screen {
+		position: fixed;
+		height: 100vh;
+		width: 100vw;
+		background-color: rgba(255,255,255,0.7);
+
+		text-align: center;
+		vertical-align: middle;
+		line-height: 90vh; 
+	}
+</style>
+<div id="loading-screen">
+	<i class="fa fa-cog fa-spin" style="font-size:24px"></i> <b>Loading...</b> 
+</div>

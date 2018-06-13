@@ -284,6 +284,7 @@
                     var params = {username: newuser};
 
                     postRequest('<%=domainName%>/api/league/'+data.id+'/addPlayer',params,function (data) {
+                        toRefreshScreen = true;
                         $("#tournament-details").hide();
                         alert("Added!");
                         $("#add-participant-username").val("");
@@ -336,6 +337,7 @@
         });
 
         $("#close-add-participant-screen").click(function () {
+            if (toRefreshScreen) location.reload();
             $("#add-participant-screen").hide();
         });
 
@@ -366,6 +368,9 @@
         }*/
 
         $(function() {
+
+            toRefreshScreen = false;
+
             $("#tournament-details").hide();
                 $("#add-participant").hide();
                 $("#add-participant-screen").hide();

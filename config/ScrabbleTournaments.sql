@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 12, 2018 at 09:50 PM
+-- Generation Time: Jun 13, 2018 at 11:03 PM
 -- Server version: 5.7.22-0ubuntu0.16.04.1
 -- PHP Version: 7.0.30-0ubuntu0.16.04.1
 
@@ -64,8 +64,8 @@ CREATE TABLE `leagueLeaderboards` (
 ,`wins` int(11)
 ,`draws` int(11)
 ,`losses` int(11)
-,`totalScore` int(11)
-,`totalScoreAgainst` int(11)
+,`points` decimal(15,4)
+,`spread` bigint(12)
 );
 
 -- --------------------------------------------------------
@@ -126,6 +126,16 @@ CREATE TABLE `refGameResultCode` (
   `gameResultCode` varchar(4) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `refGameResultCode`
+--
+
+INSERT INTO `refGameResultCode` (`gameResultCode`) VALUES
+('DRAW'),
+('none'),
+('P1W'),
+('P2W');
+
 -- --------------------------------------------------------
 
 --
@@ -136,6 +146,18 @@ CREATE TABLE `refScoreStatusCode` (
   `scoreStatusCode` varchar(16) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `refScoreStatusCode`
+--
+
+INSERT INTO `refScoreStatusCode` (`scoreStatusCode`) VALUES
+('accepted'),
+('none'),
+('p1countered'),
+('p1entered'),
+('p2countered'),
+('p2entered');
+
 -- --------------------------------------------------------
 
 --
@@ -143,7 +165,7 @@ CREATE TABLE `refScoreStatusCode` (
 --
 DROP TABLE IF EXISTS `leagueLeaderboards`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `leagueLeaderboards`  AS  select `leagueParticipation`.`leagueId` AS `leagueId`,`leagues`.`name` AS `name`,`leagueParticipation`.`username` AS `username`,((`leagueParticipation`.`wins` + `leagueParticipation`.`draws`) + `leagueParticipation`.`losses`) AS `played`,`leagueParticipation`.`wins` AS `wins`,`leagueParticipation`.`draws` AS `draws`,`leagueParticipation`.`losses` AS `losses`,`leagueParticipation`.`totalScore` AS `totalScore`,`leagueParticipation`.`totalScoreAgainst` AS `totalScoreAgainst` from (`leagueParticipation` join `leagues` on((`leagueParticipation`.`leagueId` = `leagues`.`id`))) order by (`leagueParticipation`.`wins` + (`leagueParticipation`.`draws` / 2)) desc,(`leagueParticipation`.`totalScore` - `leagueParticipation`.`totalScoreAgainst`) desc ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `leagueLeaderboards`  AS  select `leagueParticipation`.`leagueId` AS `leagueId`,`leagues`.`name` AS `name`,`leagueParticipation`.`username` AS `username`,((`leagueParticipation`.`wins` + `leagueParticipation`.`draws`) + `leagueParticipation`.`losses`) AS `played`,`leagueParticipation`.`wins` AS `wins`,`leagueParticipation`.`draws` AS `draws`,`leagueParticipation`.`losses` AS `losses`,(`leagueParticipation`.`wins` + (`leagueParticipation`.`draws` / 2)) AS `points`,(`leagueParticipation`.`totalScore` - `leagueParticipation`.`totalScoreAgainst`) AS `spread` from (`leagueParticipation` join `leagues` on((`leagueParticipation`.`leagueId` = `leagues`.`id`))) order by (`leagueParticipation`.`wins` + (`leagueParticipation`.`draws` / 2)) desc,(`leagueParticipation`.`totalScore` - `leagueParticipation`.`totalScoreAgainst`) desc ;
 
 --
 -- Indexes for dumped tables
@@ -210,7 +232,7 @@ ALTER TABLE `refScoreStatusCode`
 -- AUTO_INCREMENT for table `leagueGames`
 --
 ALTER TABLE `leagueGames`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 --
 -- AUTO_INCREMENT for table `leagues`
 --
