@@ -86,9 +86,12 @@ module.exports = function(router, db) {
 				let p1Score = req.body.playerOneScore;
 				let p2Score = req.body.playerTwoScore;
 
-				if (!p1Score || !p2Score) {
-					return res.send({ error:true, message: 'Please provide playerOneScore and playerTwoScore.'});
+				if (!p1Score || !p2Score || isNaN(p1Score) || isNaN(p2Score)) {
+					return res.send({ error:true, message: 'Please provide valid playerOneScore and playerTwoScore.'});
 				}
+
+				p1Score = parseInt(p1Score);
+				p2Score = parseInt(p2Score);
 
 				db.query("UPDATE leagueGames SET ? WHERE id = ?", [{ playerOneScore: p1Score, playerTwoScore: p2Score, scoreStatusCode: currUser+"entered" }, gameId], function (error, results, fields) {
 					if (error) throw error;
@@ -100,9 +103,12 @@ module.exports = function(router, db) {
 				let p1Score = req.body.playerOneScore;
 				let p2Score = req.body.playerTwoScore;
 
-				if (!p1Score || !p2Score) {
-					return res.send({ error:true, message: 'Please provide playerOneScore and playerTwoScore.'});
+				if (!p1Score || !p2Score || isNaN(p1Score) || isNaN(p2Score)) {
+					return res.send({ error:true, message: 'Please provide valid playerOneScore and playerTwoScore.'});
 				}
+
+				p1Score = parseInt(p1Score);
+				p2Score = parseInt(p2Score);
 
 				db.query("UPDATE leagueGames SET ? WHERE id = ?", [{ playerOneScore: p1Score, playerTwoScore: p2Score, scoreStatusCode: currUser+"countered" }, gameId], function (error, results, fields) {
 					if (error) throw error;

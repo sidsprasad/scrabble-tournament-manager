@@ -1,5 +1,7 @@
 module.exports = function(router, db) {
 
+	const xss = require('xss');
+
 	router.get('/getLeagues', function (req, res) {
 
 		let status = req.query.status;
@@ -7,7 +9,7 @@ module.exports = function(router, db) {
 		let limit = parseInt(req.query.limit);
 		if (!status) status = 'upcoming';
 		if (!start) start = 0;
-		if (!limit) limit = 10000;
+		if (!limit || limit > 1000) limit = 1000;
 
 		var qry="";
 		switch (status) {
@@ -31,7 +33,7 @@ module.exports = function(router, db) {
 	// Create a new league
 	router.post('/createLeague', function (req, res) {
 
-		let name = req.body.name;
+		let name = xss(req.body.name);
 		let gamesPerPair = req.body.gamesPerPair;
 		let startDate = new Date(req.body.startDate);
 		let endDate = new Date(req.body.endDate);
@@ -62,6 +64,11 @@ module.exports = function(router, db) {
 
 		if (!gamesPerPair) {
 			gamesPerPair = 1;
+		} else {
+			if (isNaN(gamesPerPair)) {
+				return res.send({ error:true, message: 'Number of rounds should be an integer.' });
+			}
+			gamesPerPair = parseInt(gamesPerPair);
 		}
 
 		// CHECK IF NAME UNIQUE

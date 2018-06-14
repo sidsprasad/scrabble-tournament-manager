@@ -66,6 +66,11 @@ module.exports = function(router, db) {
 			return res.send({ error: true, message: 'You are not autorized.' });
 		}
 
+		// TODO: UPDATE IF ADMIN LEVELS CHANGE
+		if(adminLevel != 0 && adminLevel != 1 && adminLevel != 2) {
+			return res.send({ error: true, message: 'Invalid admin level.' });
+		}
+
 		db.query('SELECT username, adminLevel FROM players WHERE username=?', username, function (error, results, fields) {
 			if (error) throw error;
 
@@ -76,7 +81,7 @@ module.exports = function(router, db) {
 			oldAdminLevel = results[0].adminLevel;
 
 			if (oldAdminLevel > adminLevel) {
-				return res.send({ error:true, message: 'Cannot demote using this endpoint. Use /removeAdmin.' });
+				return res.send({ error:true, message: 'Cannot demote using this endpoint. Use /removeAdmin (coming soon).' });
 			}
 
 			db.query("UPDATE players SET adminLevel=? WHERE username = ?", [adminLevel,username], function (error, results, fields) {
