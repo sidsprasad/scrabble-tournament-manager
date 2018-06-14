@@ -283,18 +283,19 @@
             $("#create-tournament-form").show();
         });
 
-        function generateOTP(record) {
-            params = {email: record.email};
-            postRequest('<%=domainName%>/api/profile/generateOTP',params,function (data) {
-                $("#OTP_"+record.username).html(data.OTP);
-                alert("OTP generated.");
+        function approveRequest(record) {
+
+            params = {email: record.email, username: record.username};
+            postRequest('<%=domainName%>/api/profile/approveAccountCreationRequest',params,function (data) {
+                alert("Request Approved.");
+                $("#user_"+record.username).remove();
             });
         }
 
         function deleteRequest(record) {
 
             params = {email: record.email};
-            postRequest('<%=domainName%>/api/profile/deleteCreationRequest',params,function (data) {
+            postRequest('<%=domainName%>/api/profile/deleteAccountCreationRequest',params,function (data) {
                 alert("Request Deleted.");
                 $("#user_"+record.username).remove();
             });
@@ -305,14 +306,18 @@
         function createRecord(data, i) {
 
 
-            var record = $.parseHTML('<div id="user_'+data.username+'" class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'+i+'">'+data.email+'</a></h4></div><div id="collapse'+i+'" class="panel-collapse collapse in"><div class="panel-body"><b>Requested Username: </b>'+data.username+'<br><p><b>Message: </b>'+data.message+'</p><b>OTP: </b> <span id="OTP_'+data.username+'">'+data.OTP+'</span><br><button id="genOTP_'+data.username+'">Generate new OTP</button>&nbsp;<button id="delete_'+data.username+'">Delete Request</button></div></div></div>');
+            var record = $.parseHTML('<div id="user_'+data.username+'" class="panel panel-default"><div class="panel-heading"><h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#collapse'+i+'">'+data.email+'</a></h4></div><div id="collapse'+i+'" class="panel-collapse collapse in"><div class="panel-body"><b>Requested Username: </b>'+data.username+'<br><b>Phone Number: </b> '+data.number+'<p><b>Message: </b>'+data.message+'</p><br><button id="approve_'+data.username+'">Approve</button>&nbsp;<button id="delete_'+data.username+'">Delete Request</button></div></div></div>');
 
             $("#accordion").append(record);
-            $("#genOTP_"+data.username).click(function () {
-                generateOTP(data);
+            $("#approve_"+data.username).click(function () {
+                if (confirm("Approve request from "+data.email+"?")) {
+                    approveRequest(data);
+                }
             });
             $("#delete_"+data.username).click(function () {
-                deleteRequest(data);
+                if (confirm("Delete request from "+data.email+"?")) {
+                    deleteRequest(data);
+                }
             });
         }
 

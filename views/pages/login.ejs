@@ -46,21 +46,6 @@
 	    #request-account-form h2 {
 	        margin: 0 0 15px;
 	    }
-
-	    #account-creation-form {
-			width: 340px;
-	    	margin: 50px auto;
-		}
-	    #account-creation-form form {
-	    	margin-bottom: 15px;
-	        background: #f7f7f7;
-	        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-	        padding: 30px;
-	    }
-	    #account-creation-form h2 {
-	        margin: 0 0 15px;
-	    }
-
 	</style>
     <div id="login-form">
 	    <form>
@@ -82,7 +67,6 @@
 	    </form>
 	    
 	    <p class="text-center"><button type="button" class="btn btn-secondary btn-block" id="open-request-account-form">Request for an Account</button></p>
-	    <p class="text-center"><button type="button" class="btn btn-secondary btn-block" id="open-account-creation-form">I have an OTP</button></p>
 	</div>
 
 	<div id="request-account-form">
@@ -93,6 +77,15 @@
 	        </div>
 	        <div class="form-group">
 	            <input type="text" class="form-control" placeholder="Username" required="required" id="requested-username">
+	        </div>
+	        <div class="form-group">
+	            <input type="text" class="form-control" placeholder="Mobile Number" required="required" id="requested-number">
+	        </div>
+	        <div class="form-group">
+	            <input type="password" class="form-control" placeholder="New Password" required="required" id="requested-pass">
+	        </div>
+	        <div class="form-group">
+	            <input type="password" class="form-control" placeholder="Re-enter New Password" required="required" id="requested-pass-repeat">
 	        </div>
 	        <div class="form-group">
 	            <textarea class="form-control" style="width: 100%;" id="requested-message" placeholder="Message to Admin (Optional)
@@ -106,31 +99,6 @@
 	    <p class="text-center"><button type="button" class="btn btn-secondary btn-block open-login-form">Already have an account?</button></p>
 	</div>
 
-	<div id="account-creation-form">
-		<form>
-	        <h2 class="text-center">Account Creation</h2>       
-	        <div class="form-group">
-	            <input type="email" class="form-control" placeholder="E-mail ID" required="required" id="to-create-email">
-	        </div>
-	        <div class="form-group">
-	            <input type="text" class="form-control" placeholder="Username" required="required" id="to-create-username">
-	        </div>
-	        <div class="form-group">
-	            <input type="text" class="form-control" placeholder="OTP" required="required" id="to-create-OTP">
-	        </div>
-	        <div class="form-group">
-	            <input type="password" class="form-control" placeholder="New Password" required="required" id="to-create-pass">
-	        </div>
-	        <div class="form-group">
-	            <input type="password" class="form-control" placeholder="Re-enter New Password" required="required" id="to-create-pass-repeat">
-	        </div>
-	        <div class="form-group">
-	            <button type="button" class="btn btn-primary btn-block" id="create-button">Create</button>
-	        </div>   
-	    </form>
-	    
-	    <p class="text-center"><button type="button" class="btn btn-secondary btn-block open-login-form">Back</button></p>
-	</div>
 </main>
 
 <footer>
@@ -142,8 +110,8 @@
 
 	<script type="text/javascript">
 		$("#login-button").click(function(){
-			username = $("#username").val();
-			password = $("#password").val();
+			var username = $("#username").val();
+			var password = $("#password").val();
 			params = {
 				username: username,
 				pass: password
@@ -178,16 +146,27 @@
 		});
 
 		$("#request-button").click(function(){
-			username = $("#requested-username").val();
-			email = $("#requested-email").val();
-			message = $("#requested-message").val();
+			var username = $("#requested-username").val();
+			var email = $("#requested-email").val();
+			var number = $("#requested-number").val();
+			var message = $("#requested-message").val();
+
+			var newPass = $("#requested-pass").val();
+			var newPassRepeat = $("#requested-pass-repeat").val();
+
 			params = {
 				email: email,
 				username: username,
+				number: number,
+				newPass: newPass,
 				message: message
 			};
-			if (!username || !email) {
-				alert("Enter username and password.");
+
+			
+			if (!username || !email || !number || !newPass || !newPassRepeat) {
+				alert ("Fields missing!");
+			} else if (newPass !== newPassRepeat) {
+				alert("Passwords do not match!");
 			} else {
 				$.post("<%= domainName %>/api/auth/requestAccount", params, function(data, status) {
 					//alert("Data: " + data + "\nStatus: " + status);
@@ -199,7 +178,11 @@
 
 						$("#requested-username").val("");
 						$("#requested-email").val("");
+						$("#requested-number").val("");
 						$("#requested-message").val("");
+
+						$("#requested-pass").val("");
+						$("#requested-pass-repeat").val("");
 
 					} else if(data && data.error) {
 						alert(data.message);
@@ -212,72 +195,18 @@
 			}
 		});
 
-		$("#create-button").click(function () {
-			username = $("#to-create-username").val();
-			email = $("#to-create-email").val();
-			OTP = $("#to-create-OTP").val();
-
-			newPass = $("#to-create-pass").val();
-			newPassRepeat = $("#to-create-pass-repeat").val();
-
-			params = {
-				username: username,
-				email: email,
-				newPass: newPass,
-				OTP: OTP
-			}
-			if (!username || !email || !OTP || !newPass || !newPassRepeat) {
-				alert ("All fields required!");
-			} else if (newPass !== newPassRepeat) {
-				alert("Passwords do not match!");
-			} else {
-				$.post("<%= domainName %>/api/auth/createAccount", params, function(data, status) {
-					//alert("Data: " + data + "\nStatus: " + status);
-					if (status=='success' && !data.error) {
-
-						alert("Successfully Created Account!")						
-						$("#to-create-username").val("");
-						$("#to-create-email").val("");
-						$("#to-create-OTP").val("");
-
-						$("#to-create-pass").val("");
-						$("#to-create-pass-repeat").val("");
-
-						location.reload();
-					} else if(data && data.error) {
-						alert(data.message);
-					} else {
-						alert("Error!");
-					}
-				}).fail(function(response) {
-				    alert('Error: ' + response.responseText);
-				});
-			}
-
-
-		});
-
 		$(".open-login-form").click(function () {
-			$("#account-creation-form").hide();	
 			$("#request-account-form").hide();			
 			$("#login-form").show();
 		});
 
 		$("#open-request-account-form").click(function () {
-			$("#account-creation-form").hide();	
 			$("#login-form").hide();
 			$("#request-account-form").show();			
 		});
 
-		$("#open-account-creation-form").click(function () {
-			$("#login-form").hide();
-			$("#request-account-form").hide();			
-			$("#account-creation-form").show();	
-		});
-
 		$(function() {
 			$("#request-account-form").hide();
-			$("#account-creation-form").hide();	
 			$("#login-form").show();
         });
 	</script>

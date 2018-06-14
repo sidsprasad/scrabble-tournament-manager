@@ -44,7 +44,7 @@ module.exports = function(router, db) {
 			return res.send({ error: true, message: 'You are not authorized.' });
 		}
 
-		db.query('SELECT * FROM accountCreationRequests', {}, function (error, results, fields) {
+		db.query('SELECT email, username, number, message FROM accountCreationRequests', {}, function (error, results, fields) {
 			if (error) throw error;
 			return res.send({ error: false, data: results, message: 'List of Account Creation Requests.' });
 		});
@@ -88,7 +88,7 @@ module.exports = function(router, db) {
 
 	});
 
-	router.post('/deleteCreationRequest', function (req,res) {
+	router.post('/deleteAccountCreationRequest', function (req,res) {
 		let email = req.body.email;
 
 		let currUser = res.locals.username;
@@ -104,22 +104,9 @@ module.exports = function(router, db) {
 		});
 	});
 
-	function generateOTP(length) {
-		
-		var t = ((new Date()).getTime()).toString();
-		var text = "";
-		var textLen = length-(t.length+1);
-		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-		for (var i = 0; i < textLen; i++)
-			text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-		text += "-"+t;
-		return text;
-	}
-
-	router.post('/generateOTP', function (req,res) {
+	router.post('/approveAccountCreationRequest', function (req,res) {
 		let email = req.body.email;
+		let username = req.body.username;
 
 		let currUser = res.locals.username;
 		let currAdminLevel = res.locals.adminLevel;
@@ -128,14 +115,52 @@ module.exports = function(router, db) {
 			return res.send({ error: true, message: 'You are not authorized.' });
 		}
 
-		var OTP = generateOTP(32);
+		if (!email || !username) {
+			return res.send({ error: true, message: 'Email ID and username are required.'});
+		}
 
-		db.query('UPDATE accountCreationRequests SET OTP=? WHERE email=? ', [OTP, email], function (error, results, fields) {
+		db.query('SELECT email, username, number, passHash FROM accountCreationRequests WHERE username=? AND email=?', [username, email], function (error, results, fields) {
 			if (error) throw error;
-			return res.send({ error: false, OTP: OTP, message: 'OTP Generated.' });
+			
+			if(results[0]) {
+
+				result = results[0];
+				db.beginTransaction(function (error){
+					if(error) {
+						db.rollback(function() {
+							throw error;
+						});
+					}
+					db.query("INSERT INTO players SET ?", { email: result.email, username: result.username, number: result.number, passHash: result.passHash }, function (error, results, fields) {
+						if(error) {
+							db.rollback(function() {
+								throw error;
+							});
+						}
+
+						db.query("DELETE FROM accountCreationRequests WHERE username=? AND email=?", [username, email], function (error, results, fields) {
+							if(error) {
+								db.rollback(function() {
+									throw error;
+								});
+							}
+							db.commit(function (error) {
+								if(error) {
+									db.rollback(function() {
+										throw error;
+									});
+								}	
+								return res.send({ error: false, message: 'Account Created.'});
+							});
+						});
+					});
+				});
+			} else {
+				return res.send({ error: true, message: 'Request not found'});
+			}
 		});
+
 	});
-	
 
 	return router;
 }

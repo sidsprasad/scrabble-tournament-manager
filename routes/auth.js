@@ -2,12 +2,14 @@ module.exports = function(router, db) {
 
 	const jwt = require('jsonwebtoken');
 	const bcrypt = require('bcrypt');
+	const xss = require('xss');
 
 	router.post('/', function (req, res) {
 	
 		let username = req.body.username;
 		let password = req.body.pass;
 
+		let invalidCredsString = "Invalid Username or Password.";
 	
 		db.query('SELECT username, passHash, adminLevel FROM players WHERE username=?', username, function (error, results, fields) {
 			if (error) throw error;
@@ -24,11 +26,18 @@ module.exports = function(router, db) {
 
 						return res.send({ error: false, message: 'Welcome. Here is your token.', token: token , adminLevel: results[0].adminLevel});
 					} else {
-						return res.send({ error: true, message: 'Invalid Password.' });
+						return res.send({ error: true, message: invalidCredsString });
 					} 
 				});
+
 			} else {
-				return res.send({ error: true, message: 'Invalid Username.' });
+				db.query('SELECT username FROM accountCreationRequests WHERE username=?', username, function (error, results, fields) {
+					if(results[0]) {
+						return res.send({ error: true, message: 'Account not yet approved by admins.' });
+					} else {
+						return res.send({ error: true, message: invalidCredsString });
+					}
+				});
 			}
 
 		});
@@ -36,12 +45,32 @@ module.exports = function(router, db) {
 	});
 
 	router.post('/requestAccount', function (req,res) {
-		let email = req.body.email;
-		let username = req.body.username;
-		let message = req.body.message;
 
-		if (!email || !username) {
-			return res.send({ error: true, message: 'Email ID and username are required.'});
+		let email = req.body.email;
+		let username = String(req.body.username).toLowerCase();
+		let number = xss(req.body.number);
+		let password = req.body.newPass;
+
+		let message = xss(req.body.message);
+
+		if (!email || !username || !number || !password) {
+			return res.send({ error: true, message: 'Email ID, username, phone number and password are all are required.'});
+		}
+
+		if(email.length > 255  || !validateEmail(email)) {
+			return res.send({ error: true, message: 'Invalid email ID.'});
+		}
+
+		if(username.length > 32 || !validateUsername(username)) {
+			return res.send({ error: true, message: 'Invalid username.'});
+		}
+
+		if(number.length > 15) {
+			return res.send({ error: true, message: 'Invalid Phone Number.'});
+		}
+
+		if(password.length > 60) {
+			return res.send({ error: true, message: 'Max length of password is 60 characters.'});
 		}
 
 		if (message.length > 128) {
@@ -55,74 +84,17 @@ module.exports = function(router, db) {
 				return res.send({ error: true, message: 'The given username and/or email ID already exists.'});
 			}
 
-			db.query("INSERT INTO accountCreationRequests SET ?", { email: email, username: username, message: message }, function (error, results, fields) {
-				if (error) {
-					return res.send({ error: true, message: 'The given username and/or email ID already requested.'});
-					throw error;
-				}
-				return res.send({ error: false, message: 'Account requested.'});
-			});
-		});
+			bcrypt.hash(password, 10, function(error, hash) {
+				if (error) throw error;
 
-	});
-
-	router.post('/createAccount', function (req,res) {
-		let email = req.body.email;
-		let username = req.body.username;
-		let OTP = req.body.OTP;
-		let password = req.body.newPass;
-
-
-		if (!email || !username || !OTP || !password) {
-			return res.send({ error: true, message: 'Email ID, username, OTP and password are all are required.'});
-		}
-
-		if(password.length > 60) {
-			return res.send({ error: true, message: 'Max length of password is 60 characters.'});
-		}
-
-		db.query('SELECT username FROM accountCreationRequests WHERE username=? AND email=? AND OTP=?', [username, email, OTP], function (error, results, fields) {
-			if (error) throw error;
-			
-			if(results[0]) {
-				//return res.send({ error: false, message: 'Valid Details. Make request to /setPassword.'});
-				bcrypt.hash(password, 10, function(error, hash) {
-					if (error) throw error;
-					// Store hash in database
-					db.beginTransaction(function (error){
-						if(error) {
-							db.rollback(function() {
-								throw error;
-							});
-						}
-						db.query("INSERT INTO players SET ?", { email: email, username: username, passHash: hash }, function (error, results, fields) {
-							if(error) {
-								db.rollback(function() {
-									throw error;
-								});
-							}
-
-							db.query("DELETE FROM accountCreationRequests WHERE username=? AND email=?", [username, email], function (error, results, fields) {
-								if(error) {
-									db.rollback(function() {
-										throw error;
-									});
-								}
-								db.commit(function (error) {
-									if(error) {
-										db.rollback(function() {
-											throw error;
-										});
-									}	
-									return res.send({ error: false, message: 'Account Created.'});
-								});
-							});
-						});
-					});
+				db.query("INSERT INTO accountCreationRequests SET ?", { email: email, username: username, number: number, message: message, passHash: hash }, function (error, results, fields) {
+					if (error) {
+						return res.send({ error: true, message: 'The given username and/or email ID already requested.'});
+						throw error;
+					}
+					return res.send({ error: false, message: 'Account requested.'});
 				});
-			} else {
-				return res.send({ error: true, message: 'Invalid information.'});
-			}
+			});
 		});
 
 	});
@@ -135,3 +107,14 @@ function expiresIn(numDays) {
 	var dateObj = new Date();
 	return dateObj.setDate(dateObj.getDate() + numDays);
 }
+
+function validateEmail(email) {
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+}
+
+function validateUsername(username) {
+    var re = /^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/;
+    return re.test(String(username).toLowerCase());
+}
+

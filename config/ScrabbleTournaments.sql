@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 13, 2018 at 11:03 PM
+-- Generation Time: Jun 15, 2018 at 02:40 AM
 -- Server version: 5.7.22-0ubuntu0.16.04.1
 -- PHP Version: 7.0.30-0ubuntu0.16.04.1
 
@@ -29,8 +29,9 @@ SET time_zone = "+00:00";
 CREATE TABLE `accountCreationRequests` (
   `email` varchar(64) NOT NULL,
   `username` varchar(32) NOT NULL,
-  `message` text NOT NULL,
-  `OTP` varchar(32) DEFAULT NULL
+  `number` varchar(15) NOT NULL,
+  `message` text,
+  `passHash` varchar(64) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -108,7 +109,8 @@ CREATE TABLE `leagues` (
 
 CREATE TABLE `players` (
   `username` varchar(32) NOT NULL,
-  `email` varchar(64) DEFAULT NULL,
+  `email` varchar(256) DEFAULT NULL,
+  `number` varchar(15) DEFAULT NULL,
   `passHash` varchar(64) NOT NULL,
   `adminLevel` smallint(6) NOT NULL DEFAULT '0',
   `wins` int(11) NOT NULL DEFAULT '0',
@@ -232,7 +234,7 @@ ALTER TABLE `refScoreStatusCode`
 -- AUTO_INCREMENT for table `leagueGames`
 --
 ALTER TABLE `leagueGames`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 --
 -- AUTO_INCREMENT for table `leagues`
 --
